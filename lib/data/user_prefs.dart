@@ -1,37 +1,31 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sawa_lite/data/models/user_model.dart';
 
 class UserPrefs {
+  static const String _userKey = "user_data";
+
+  // حفظ بيانات المستخدم
   static Future<void> saveUser(UserModel user) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('id', user.id);
-    await prefs.setString('name', user.name);
-    await prefs.setString('phone', user.phone);
-    await prefs.setString('password', user.password);
+    final jsonString = jsonEncode(user.toJson());
+    await prefs.setString(_userKey, jsonString);
   }
 
+  // تحميل بيانات المستخدم
   static Future<UserModel?> loadUser() async {
     final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_userKey);
 
-    final id = prefs.getInt('id');
-    final name = prefs.getString('name');
-    final phone = prefs.getString('phone');
-    final password = prefs.getString('password');
+    if (jsonString == null) return null;
 
-    if (id == null || name == null || phone == null || password == null) {
-      return null;
-    }
-
-    return UserModel(
-      id: id,
-      name: name,
-      phone: phone,
-      password: password,
-    );
+    final jsonMap = jsonDecode(jsonString);
+    return UserModel.fromJson(jsonMap);
   }
 
+  // حذف بيانات المستخدم
   static Future<void> clearUser() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+    await prefs.remove(_userKey);
   }
 }

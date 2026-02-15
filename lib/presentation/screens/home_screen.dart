@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:sawa_lite/presentation/screens/profile/profile_screen.dart';
 import 'package:sawa_lite/presentation/screens/services/services_list_screen.dart';
 import 'package:sawa_lite/presentation/screens/about/about_screen.dart';
+import '../../data/models/user_model.dart';
+import '../../data/user_prefs.dart';
+import 'auth/login_screen.dart';
 import 'settings/settings_screen.dart';
+import 'package:sawa_lite/presentation/screens/profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = const [
     _MainHomePage(),
     ServicesListScreen(),
-    ProfileScreen(),
   ];
 
   @override
@@ -82,15 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 ListTile(
-                  leading: Icon(Icons.person, color: primaryColor),
-                  title: const Text("الملف الشخصي"),
-                  onTap: () {
-                    setState(() => _currentIndex = 2);
-                    Navigator.pop(context);
-                  },
-                ),
-
-                ListTile(
                   leading: Icon(Icons.settings, color: primaryColor),
                   title: const Text("الإعدادات"),
                   onTap: () {
@@ -115,13 +108,66 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Spacer(),
 
                 ListTile(
+                  leading: const Icon(Icons.person, color: Colors.blue),
+                  title: const Text("الملف الشخصي"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                    );
+                  },
+                ),
+
+                ListTile(
                   leading: const Icon(Icons.logout, color: Colors.red),
                   title: const Text(
                     "تسجيل الخروج",
                     style: TextStyle(color: Colors.red),
                   ),
-                  onTap: () {},
+                  onTap: () async {
+                    Navigator.pop(context); // إغلاق القائمة الجانبية
+
+                    // نافذة التأكيد
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) {
+                        return Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: AlertDialog(
+                            title: const Text("تأكيد تسجيل الخروج"),
+                            content: const Text("هل أنت متأكد أنك تريد تسجيل الخروج؟"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text("إلغاء"),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text(
+                                  "تسجيل الخروج",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+
+                    // إذا وافق المستخدم
+                    if (confirm == true) {
+                      await UserPrefs.clearUser();
+                      currentUser = null;
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      );
+                    }
+                  },
                 ),
+
+
               ],
             ),
           ),
@@ -159,10 +205,6 @@ class _HomeScreenState extends State<HomeScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.list),
               label: "الخدمات",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: "الملف الشخصي",
             ),
           ],
         ),
@@ -241,9 +283,6 @@ class _MainHomePage extends StatelessWidget {
     );
   }
 
-  // --------------------------------------------------
-  // 🔥 بطاقة مع Animation (Fade + Slide + Scale on Tap)
-  // --------------------------------------------------
   static Widget _buildServiceCard(
       BuildContext context, {
         required IconData icon,

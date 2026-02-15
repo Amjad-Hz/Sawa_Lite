@@ -1,7 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:sawa_lite/data/models/user_model.dart';
-import 'package:sawa_lite/presentation/screens/auth/login_screen.dart';
-import '../../../data/user_prefs.dart';
+import 'package:sawa_lite/presentation/screens/profile/edit_profile_screen.dart';
+import 'change_password_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -24,9 +25,14 @@ class ProfileScreen extends StatelessWidget {
             children: [
 
               // صورة المستخدم
-              const CircleAvatar(
-                radius: 45,
-                child: Icon(Icons.person, size: 55),
+              CircleAvatar(
+                radius: 50,
+                backgroundImage: currentUser?.imagePath != null
+                    ? FileImage(File(currentUser!.imagePath!))
+                    : null,
+                child: currentUser?.imagePath == null
+                    ? const Icon(Icons.person, size: 60)
+                    : null,
               ),
 
               const SizedBox(height: 16),
@@ -42,6 +48,8 @@ class ProfileScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+
+                      // الاسم
                       Text(
                         currentUser?.name ?? 'غير معروف',
                         style: const TextStyle(
@@ -52,8 +60,17 @@ class ProfileScreen extends StatelessWidget {
 
                       const SizedBox(height: 8),
 
+                      // رقم الهاتف
                       Text(
                         'رقم الهاتف: ${currentUser?.phone ?? '---'}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // البريد الإلكتروني
+                      Text(
+                        'البريد الإلكتروني: ${currentUser?.email ?? '---'}',
                         style: const TextStyle(fontSize: 16),
                       ),
                     ],
@@ -63,50 +80,40 @@ class ProfileScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // عناصر القائمة
+              // زر تعديل البيانات
               ListTile(
-                leading: Icon(Icons.settings, color: primaryColor),
-                title: const Text('الإعدادات'),
-                onTap: () {},
+                leading: Icon(Icons.edit, color: primaryColor),
+                title: const Text('تعديل البيانات'),
+                onTap: () async {
+                  final updated = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                  );
+
+                  if (updated == true) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                    );
+                  }
+
+                },
               ),
 
+              // زر تغيير كلمة المرور
               ListTile(
                 leading: Icon(Icons.lock, color: primaryColor),
                 title: const Text('تغيير كلمة المرور'),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
+                  );
+                },
               ),
 
-              ListTile(
-                leading: Icon(Icons.info, color: primaryColor),
-                title: const Text('حول التطبيق'),
-                onTap: () {},
-              ),
 
               const Spacer(),
-
-              // زر تسجيل الخروج
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await UserPrefs.clearUser();
-                    currentUser = null;
-
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text(
-                    'تسجيل الخروج',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

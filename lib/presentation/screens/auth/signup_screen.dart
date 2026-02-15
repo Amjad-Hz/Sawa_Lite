@@ -14,6 +14,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
@@ -21,6 +22,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -29,10 +31,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void _register() async {
     if (_formKey.currentState!.validate()) {
       currentUser = UserModel(
-        id: 1,
+        id: DateTime.now().millisecondsSinceEpoch, // ID مؤقت
         name: _nameController.text,
         phone: _phoneController.text,
+        email: _emailController.text,
         password: _passwordController.text,
+        imagePath: null, // لا توجد صورة عند التسجيل
       );
 
       await UserPrefs.saveUser(currentUser!);
@@ -57,7 +61,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // الشعار
+
                 Image.asset(
                   'assets/logo.png',
                   width: 140,
@@ -94,6 +98,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   decoration: const InputDecoration(labelText: 'رقم الهاتف'),
                   validator: (value) =>
                   value == null || value.isEmpty ? 'الرجاء إدخال رقم الهاتف' : null,
+                ),
+
+                const SizedBox(height: 16),
+
+                // البريد الإلكتروني
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(labelText: 'البريد الإلكتروني'),
+                  validator: (value) =>
+                  value == null || value.isEmpty ? 'الرجاء إدخال البريد الإلكتروني' : null,
                 ),
 
                 const SizedBox(height: 16),

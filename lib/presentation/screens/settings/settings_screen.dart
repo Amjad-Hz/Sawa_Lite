@@ -5,8 +5,6 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).primaryColor;
-
     return const Directionality(
       textDirection: TextDirection.rtl,
       child: _SettingsBody(),
@@ -44,15 +42,11 @@ class _SettingsBody extends StatelessWidget {
           ),
 
           ListTile(
-            leading: Icon(Icons.lock, color: primaryColor),
-            title: const Text("تغيير كلمة المرور"),
-            onTap: () {},
-          ),
-
-          ListTile(
             leading: Icon(Icons.language, color: primaryColor),
             title: const Text("اللغة"),
-            onTap: () {},
+            onTap: () {
+              // TODO: صفحة اختيار اللغة
+            },
           ),
 
           const Divider(),
@@ -73,13 +67,17 @@ class _SettingsBody extends StatelessWidget {
             title: const Text("الوضع الليلي"),
             secondary: Icon(Icons.dark_mode, color: primaryColor),
             value: false,
-            onChanged: (value) {},
+            onChanged: (value) {
+              // TODO: تفعيل الوضع الليلي
+            },
           ),
 
           ListTile(
             leading: Icon(Icons.info, color: primaryColor),
             title: const Text("حول التطبيق"),
-            onTap: () {},
+            onTap: () {
+              // TODO: صفحة حول التطبيق
+            },
           ),
 
           const Divider(),
@@ -99,13 +97,17 @@ class _SettingsBody extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.help, color: primaryColor),
             title: const Text("مركز المساعدة"),
-            onTap: () {},
+            onTap: () {
+              // TODO: صفحة المساعدة
+            },
           ),
 
           ListTile(
             leading: Icon(Icons.contact_support, color: primaryColor),
             title: const Text("اتصل بنا"),
-            onTap: () {},
+            onTap: () {
+              // TODO: صفحة اتصل بنا
+            },
           ),
         ],
       ),
