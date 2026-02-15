@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import 'core/theme/light_theme.dart';
-import 'core/theme/dark_theme.dart';
-import 'core/theme/theme_controller.dart';
-import 'presentation/screens/splash_screen.dart';
+import 'frontend/core/theme/light_theme.dart';
+import 'frontend/core/theme/dark_theme.dart';
+import 'frontend/core/theme/theme_controller.dart';
+import 'frontend/presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
