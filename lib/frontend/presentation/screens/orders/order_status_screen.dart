@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:sawa_lite/frontend/data/api/api_service.dart';
 import 'package:sawa_lite/frontend/data/models/order_model.dart';
 import 'package:sawa_lite/frontend/data/models/service_model.dart';
 
-class OrderStatusScreen extends StatelessWidget {
+class OrderStatusScreen extends StatefulWidget {
   final OrderModel order;
   final ServiceModel service;
 
@@ -11,6 +13,89 @@ class OrderStatusScreen extends StatelessWidget {
     required this.order,
     required this.service,
   });
+
+  @override
+  State<OrderStatusScreen> createState() => _OrderStatusScreenState();
+}
+
+class _OrderStatusScreenState extends State<OrderStatusScreen> {
+  bool isLoading = true;
+  bool isRefreshing = false;
+  bool isPaying = false;
+  String? errorMessage;
+  OrderModel? updatedOrder;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOrder();
+  }
+
+  Future<void> _loadOrder() async {
+    try {
+      final response =
+      await ApiService.instance.getOrderById(widget.order.id);
+
+      setState(() {
+        updatedOrder = OrderModel.fromJson(response);
+        isLoading = false;
+        isRefreshing = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "فشل تحميل حالة الطلب: $e";
+        isLoading = false;
+        isRefreshing = false;
+      });
+    }
+  }
+
+  // الحالات التي يسمح فيها بالدفع
+  bool _canPay(String status) {
+    return status == 'قيد المراجعة' || status == 'مقبول';
+  }
+
+  // الطلب مدفوع إذا كان مكتمل
+  bool _isPaid(OrderModel order) {
+    return order.status == 'مكتمل';
+  }
+
+  Future<void> _payForOrder() async {
+    setState(() {
+      isPaying = true;
+      errorMessage = null;
+    });
+
+    try {
+      await ApiService.instance.payForOrder(widget.order.id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم الدفع بنجاح من المحفظة')),
+        );
+      }
+
+      await _loadOrder();
+    } catch (e) {
+      if (mounted) {
+        String message = "فشل الدفع";
+
+        if (e is DioException && e.response != null) {
+          message = e.response!.data['detail'] ?? message;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isPaying = false;
+        });
+      }
+    }
+  }
 
   Color _statusColor(String status) {
     switch (status) {
@@ -28,6 +113,7 @@ class OrderStatusScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
+    final order = updatedOrder ?? widget.order;
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -35,17 +121,38 @@ class OrderStatusScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text('متابعة الطلب'),
           centerTitle: true,
+          actions: [
+            IconButton(
+              icon: isRefreshing
+                  ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+                  : const Icon(Icons.refresh),
+              onPressed: () {
+                setState(() => isRefreshing = true);
+                _loadOrder();
+              },
+            ),
+          ],
         ),
 
-        body: Padding(
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : errorMessage != null
+            ? Center(child: Text(errorMessage!))
+            : Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              // عنوان الخدمة
+              // اسم الخدمة
               Text(
-                service.nameAr,
+                widget.service.nameAr,
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -54,7 +161,7 @@ class OrderStatusScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // بطاقة حالة الطلب
+              // حالة الطلب
               Card(
                 elevation: 3,
                 shape: RoundedRectangleBorder(
@@ -79,14 +186,15 @@ class OrderStatusScreen extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // بطاقة تاريخ الإنشاء
+              // تاريخ الإنشاء
               Card(
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: ListTile(
-                  leading: const Icon(Icons.calendar_today, color: Colors.grey),
+                  leading: const Icon(Icons.calendar_today,
+                      color: Colors.grey),
                   title: Text(
                     'تاريخ الإنشاء: ${order.createdAt.toString().substring(0, 10)}',
                     style: const TextStyle(fontSize: 16),
@@ -94,17 +202,17 @@ class OrderStatusScreen extends StatelessWidget {
                 ),
               ),
 
+              // آخر تحديث
               if (order.updatedAt != null) ...[
                 const SizedBox(height: 12),
-
-                // بطاقة آخر تحديث
                 Card(
                   elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: ListTile(
-                    leading: const Icon(Icons.update, color: Colors.grey),
+                    leading: const Icon(Icons.update,
+                        color: Colors.grey),
                     title: Text(
                       'آخر تحديث: ${order.updatedAt.toString().substring(0, 10)}',
                       style: const TextStyle(fontSize: 16),
@@ -115,7 +223,7 @@ class OrderStatusScreen extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // بطاقة الملاحظات
+              // ملاحظات
               if (order.notes != null && order.notes!.isNotEmpty)
                 Card(
                   elevation: 2,
@@ -125,7 +233,8 @@ class OrderStatusScreen extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment:
+                      CrossAxisAlignment.start,
                       children: [
                         const Text(
                           'ملاحظاتك:',
@@ -143,10 +252,35 @@ class OrderStatusScreen extends StatelessWidget {
 
               const Spacer(),
 
+              // زر الدفع
+              if (_canPay(order.status) && !_isPaid(order))
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: isPaying ? null : _payForOrder,
+                    icon: isPaying
+                        ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Icon(Icons.account_balance_wallet),
+                    label: const Text(
+                      'الدفع من المحفظة',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ),
+
+              const SizedBox(height: 8),
+
               // زر الرجوع
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: OutlinedButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text(
                     'رجوع',

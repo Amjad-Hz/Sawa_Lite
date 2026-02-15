@@ -1,44 +1,41 @@
 class UserModel {
   final int id;
-  final String name;
   final String phone;
   final String email;
+  final String fullName;
   final String password;
-  final String? imagePath; // مسار الصورة المخزنة محلياً
+  final String role; // يحدده الأدمن فقط
 
   UserModel({
     required this.id,
-    required this.name,
     required this.phone,
     required this.email,
+    required this.fullName,
     required this.password,
-    this.imagePath,
+    required this.role,
   });
 
-  // تحويل JSON إلى UserModel
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'],
-      name: json['name'],
       phone: json['phone'],
       email: json['email'],
+      fullName: json['full_name'],
       password: json['password'],
-      imagePath: json['imagePath'],
+      role: json['role'],
     );
   }
 
-  // تحويل UserModel إلى JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
-      'phone': phone,
-      'email': email,
-      'password': password,
-      'imagePath': imagePath,
+      "id": id,
+      "phone": phone,
+      "email": email,
+      "full_name": fullName,
+      "password": password,
+      "role": role,
     };
   }
 }
 
-// المستخدم الحالي
 UserModel? currentUser;

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:sawa_lite/frontend/data/api/api_service.dart';
+import 'package:sawa_lite/frontend/data/models/user_model.dart';
 import 'package:sawa_lite/frontend/data/user_prefs.dart';
 import 'package:sawa_lite/frontend/presentation/screens/auth/signup_screen.dart';
 import 'package:sawa_lite/frontend/presentation/screens/home_screen.dart';
-
-import '../../../data/models/user_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,66 +15,31 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-
   final _formKey = GlobalKey<FormState>();
 
-  bool isRegistered = false;
-
-  @override
-  void dispose() {
-    _phoneController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUser();
-  }
-
-  void _loadUser() async {
-    currentUser = await UserPrefs.loadUser();
-    if (currentUser != null) {
-      setState(() {
-        isRegistered = true;
-      });
-    }
-  }
-
   void _login() async {
-    if (_formKey.currentState!.validate()) {
-      if (currentUser != null &&
-          currentUser!.phone == _phoneController.text &&
-          currentUser!.password == _passwordController.text) {
+    if (!_formKey.currentState!.validate()) return;
 
-        await UserPrefs.saveUser(currentUser!);
+    try {
+      final token = await ApiService.instance.login(
+        phone: _phoneController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("رقم الهاتف أو كلمة المرور غير صحيحة")),
-        );
-      }
-    }
-  }
+      await UserPrefs.saveToken(token);
 
-  Future<void> _goToSignUp() async {
-    final registered = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const SignUpScreen()),
-    );
+      final userData = await ApiService.instance.getMe();
+      currentUser = UserModel.fromJson(userData);
 
-    if (registered == true) {
-      setState(() {
-        isRegistered = true;
-      });
+      await UserPrefs.saveUser(currentUser!);
 
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم إنشاء الحساب بنجاح، يمكنك تسجيل الدخول الآن')),
+        SnackBar(content: Text("فشل تسجيل الدخول: $e")),
       );
     }
   }
@@ -87,69 +52,38 @@ class _LoginScreenState extends State<LoginScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: Colors.white,
-
         body: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
           child: Form(
             key: _formKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // الشعار
-                Image.asset(
-                  'assets/logo.png',
-                  width: 140,
-                  fit: BoxFit.contain,
-                ),
-
+                Image.asset('assets/logo.png', width: 140),
                 const SizedBox(height: 20),
-
-                Text(
-                  "تسجيل الدخول",
-                  style: TextStyle(
-                    color: primaryColor,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
+                Text("تسجيل الدخول",
+                    style: TextStyle(
+                        color: primaryColor,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold)),
                 const SizedBox(height: 30),
 
-                // رقم الهاتف
                 TextFormField(
                   controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'رقم الهاتف',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "الرجاء إدخال رقم الهاتف";
-                    }
-                    return null;
-                  },
+                  decoration: const InputDecoration(labelText: 'رقم الهاتف'),
+                  validator: (v) =>
+                  v == null || v.isEmpty ? "الرجاء إدخال رقم الهاتف" : null,
                 ),
-
                 const SizedBox(height: 16),
 
-                // كلمة المرور
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'كلمة المرور',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "الرجاء إدخال كلمة المرور";
-                    }
-                    return null;
-                  },
+                  decoration: const InputDecoration(labelText: 'كلمة المرور'),
+                  validator: (v) =>
+                  v == null || v.isEmpty ? "الرجاء إدخال كلمة المرور" : null,
                 ),
-
                 const SizedBox(height: 24),
 
-                // زر تسجيل الدخول
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -158,15 +92,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 12),
-
-                // رابط إنشاء حساب
                 TextButton(
-                  onPressed: _goToSignUp,
-                  child: Text(
-                    'ليس لديك حساب؟ إنشاء حساب',
-                    style: TextStyle(color: primaryColor),
-                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SignUpScreen()),
+                    );
+                  },
+                  child: Text('ليس لديك حساب؟ إنشاء حساب',
+                      style: TextStyle(color: primaryColor)),
                 ),
               ],
             ),

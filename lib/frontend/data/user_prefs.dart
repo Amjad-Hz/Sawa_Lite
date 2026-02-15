@@ -3,29 +3,46 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'models/user_model.dart';
 
 class UserPrefs {
-  static const String _userKey = "user_data";
+  static const String userKey = "user_data";
+  static const String tokenKey = "token";
 
-  // حفظ بيانات المستخدم
+  static const String passwordKey = "user_password";
+
+  static Future<void> savePassword(String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString(passwordKey, password);
+  }
+
+  static Future<String?> loadPassword() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(passwordKey);
+  }
+
   static Future<void> saveUser(UserModel user) async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonString = jsonEncode(user.toJson());
-    await prefs.setString(_userKey, jsonString);
+    prefs.setString(userKey, jsonEncode(user.toJson()));
   }
 
-  // تحميل بيانات المستخدم
   static Future<UserModel?> loadUser() async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(_userKey);
-
-    if (jsonString == null) return null;
-
-    final jsonMap = jsonDecode(jsonString);
-    return UserModel.fromJson(jsonMap);
+    final data = prefs.getString(userKey);
+    if (data == null) return null;
+    return UserModel.fromJson(jsonDecode(data));
   }
 
-  // حذف بيانات المستخدم
-  static Future<void> clearUser() async {
+  static Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_userKey);
+    prefs.setString(tokenKey, token);
+  }
+
+  static Future<String?> loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(tokenKey);
+  }
+
+  static Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(userKey);
+    prefs.remove(tokenKey);
   }
 }

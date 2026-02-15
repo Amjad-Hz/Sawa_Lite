@@ -2,10 +2,13 @@ class OrderModel {
   final int id;
   final int userId;
   final int serviceId;
-  final String status; // قيد المراجعة، مقبول، مرفوض، مكتمل
+  final String status;
   final String? notes;
   final DateTime createdAt;
   final DateTime? updatedAt;
+
+  // اسم الخدمة (اختياري – قد لا يرجع من الباكند)
+  final String? serviceName;
 
   OrderModel({
     required this.id,
@@ -15,9 +18,9 @@ class OrderModel {
     this.notes,
     required this.createdAt,
     this.updatedAt,
+    this.serviceName,
   });
 
-  // تحويل JSON إلى OrderModel
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
       id: json['id'],
@@ -29,10 +32,12 @@ class OrderModel {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'])
           : null,
+
+      // إذا الباكند يرجع service_name نقرأه، إذا لا نخليه null
+      serviceName: json['service_name'],
     );
   }
 
-  // تحويل OrderModel إلى JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -42,27 +47,7 @@ class OrderModel {
       'notes': notes,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
+      'service_name': serviceName,
     };
   }
-
-
 }
-final List<OrderModel> mockOrders = [
-  OrderModel(
-    id: 1,
-    userId: 1,
-    serviceId: 3,
-    status: 'قيد المراجعة',
-    notes: 'أريد معالجة الطلب بسرعة',
-    createdAt: DateTime.now().subtract(const Duration(days: 1)),
-  ),
-  OrderModel(
-    id: 2,
-    userId: 1,
-    serviceId: 1,
-    status: 'مكتمل',
-    notes: null,
-    createdAt: DateTime.now().subtract(const Duration(days: 5)),
-    updatedAt: DateTime.now().subtract(const Duration(days: 2)),
-  ),
-];

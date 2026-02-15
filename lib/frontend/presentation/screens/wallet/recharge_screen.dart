@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sawa_lite/frontend/data/models/wallet_model.dart';
+import 'package:dio/dio.dart';
+import 'package:sawa_lite/frontend/data/api/api_service.dart';
 
 class RechargeScreen extends StatefulWidget {
   const RechargeScreen({super.key});
@@ -11,6 +12,7 @@ class RechargeScreen extends StatefulWidget {
 class _RechargeScreenState extends State<RechargeScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -18,29 +20,44 @@ class _RechargeScreenState extends State<RechargeScreen> {
     super.dispose();
   }
 
-  void _recharge() {
-    if (_formKey.currentState!.validate()) {
-      final amount = double.parse(_amountController.text);
+  Future<void> _recharge() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      // تحديث الرصيد (Mock)
-      mockWallet.balance += amount;
+    final amount = double.parse(_amountController.text);
 
-      // إضافة عملية جديدة
-      mockWallet.transactions.insert(
-        0,
-        WalletTransaction(
-          id: mockWallet.transactions.length + 1,
-          amount: amount,
-          type: 'شحن',
-          date: DateTime.now(),
-        ),
+    setState(() => isLoading = true);
+
+    try {
+      await ApiService.instance.dio.post(
+        '/wallet/charge',
+        data: {
+          "amount": amount,
+        },
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم شحن الرصيد بنجاح')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('تم شحن الرصيد بنجاح')),
+        );
+      }
 
-      Navigator.pop(context); // العودة للمحفظة
+      Navigator.pop(context, true); // العودة للمحفظة مع تحديث
+    } catch (e) {
+      String message = "فشل شحن الرصيد";
+
+      if (e is DioException && e.response != null) {
+        message = e.response!.data['detail'] ?? message;
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 
@@ -79,9 +96,21 @@ class _RechargeScreenState extends State<RechargeScreen> {
 
                 const SizedBox(height: 24),
 
-                ElevatedButton(
-                  onPressed: _recharge,
-                  child: const Text('تأكيد الشحن'),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _recharge,
+                    child: isLoading
+                        ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                        : const Text('تأكيد الشحن'),
+                  ),
                 ),
               ],
             ),

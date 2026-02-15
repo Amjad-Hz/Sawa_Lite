@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sawa_lite/frontend/data/models/user_model.dart';
 import '../../../data/user_prefs.dart';
+import 'package:sawa_lite/frontend/data/models/user_model.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -27,14 +27,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   void _changePassword() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // تحديث كلمة المرور
     currentUser = UserModel(
       id: currentUser!.id,
-      name: currentUser!.name,
       phone: currentUser!.phone,
       email: currentUser!.email,
+      fullName: currentUser!.fullName,
       password: _newPasswordController.text,
-      imagePath: currentUser!.imagePath,
+      role: currentUser!.role,
     );
 
     await UserPrefs.saveUser(currentUser!);
@@ -60,8 +59,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             key: _formKey,
             child: Column(
               children: [
-
-                // كلمة المرور الحالية
                 TextFormField(
                   controller: _currentPasswordController,
                   obscureText: true,
@@ -70,9 +67,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "الرجاء إدخال كلمة المرور الحالية";
-                    }
                     if (value != currentUser!.password) {
                       return "كلمة المرور الحالية غير صحيحة";
                     }
@@ -82,7 +76,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
                 const SizedBox(height: 16),
 
-                // كلمة المرور الجديدة
                 TextFormField(
                   controller: _newPasswordController,
                   obscureText: true,
@@ -100,7 +93,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
                 const SizedBox(height: 16),
 
-                // تأكيد كلمة المرور الجديدة
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: true,
@@ -118,18 +110,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
                 const SizedBox(height: 24),
 
-                // زر الحفظ
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: _changePassword,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: const Text(
-                      "حفظ كلمة المرور",
-                      style: TextStyle(fontSize: 16),
-                    ),
+                    child: const Text("حفظ كلمة المرور"),
                   ),
                 ),
               ],

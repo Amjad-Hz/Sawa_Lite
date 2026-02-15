@@ -13,8 +13,30 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class _SettingsBody extends StatelessWidget {
+class _SettingsBody extends StatefulWidget {
   const _SettingsBody();
+
+  @override
+  State<_SettingsBody> createState() => _SettingsBodyState();
+}
+
+class _SettingsBodyState extends State<_SettingsBody> {
+  double opacity = 0;
+  double offsetY = 20;
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() {
+          opacity = 1;
+          offsetY = 0;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,86 +48,142 @@ class _SettingsBody extends StatelessWidget {
         centerTitle: true,
       ),
 
-      body: ListView(
-        children: [
-          const SizedBox(height: 10),
+      body: AnimatedOpacity(
+        duration: const Duration(milliseconds: 400),
+        opacity: opacity,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 400),
+          transform: Matrix4.translationValues(0, offsetY, 0),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // -------------------------------
+              // قسم الحساب
+              // -------------------------------
+              _sectionTitle("الحساب"),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              "الحساب",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+              _settingsCard(
+                icon: Icons.language,
+                title: "اللغة",
+                subtitle: "العربية",
+                onTap: () {},
               ),
-            ),
-          ),
 
-          ListTile(
-            leading: Icon(Icons.language, color: primaryColor),
-            title: const Text("اللغة"),
-            onTap: () {},
-          ),
+              const SizedBox(height: 10),
 
-          const Divider(),
+              // -------------------------------
+              // قسم التطبيق
+              // -------------------------------
+              _sectionTitle("التطبيق"),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              "التطبيق",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          // 🔥 زر الوضع الليلي يعمل الآن
-          ValueListenableBuilder<bool>(
-            valueListenable: ThemeController.instance.isDark,
-            builder: (context, isDark, _) {
-              return SwitchListTile(
-                title: const Text("الوضع الليلي"),
-                secondary: Icon(Icons.dark_mode, color: primaryColor),
-                value: isDark,
-                onChanged: (value) {
-                  ThemeController.instance.toggleTheme(value);
+              ValueListenableBuilder<bool>(
+                valueListenable: ThemeController.instance.isDark,
+                builder: (context, isDark, _) {
+                  return _switchCard(
+                    icon: Icons.dark_mode,
+                    title: "الوضع الليلي",
+                    value: isDark,
+                    onChanged: (value) {
+                      ThemeController.instance.toggleTheme(value);
+                    },
+                  );
                 },
-              );
-            },
-          ),
-
-          ListTile(
-            leading: Icon(Icons.info, color: primaryColor),
-            title: const Text("حول التطبيق"),
-            onTap: () {},
-          ),
-
-          const Divider(),
-
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              "الدعم",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
               ),
-            ),
-          ),
 
-          ListTile(
-            leading: Icon(Icons.help, color: primaryColor),
-            title: const Text("مركز المساعدة"),
-            onTap: () {},
-          ),
+              const SizedBox(height: 10),
 
-          ListTile(
-            leading: Icon(Icons.contact_support, color: primaryColor),
-            title: const Text("اتصل بنا"),
-            onTap: () {},
+              _settingsCard(
+                icon: Icons.info_outline,
+                title: "حول التطبيق",
+                onTap: () {},
+              ),
+
+              const SizedBox(height: 10),
+
+              // -------------------------------
+              // قسم الدعم
+              // -------------------------------
+              _sectionTitle("الدعم"),
+
+              _settingsCard(
+                icon: Icons.help_outline,
+                title: "مركز المساعدة",
+                onTap: () {},
+              ),
+
+              const SizedBox(height: 10),
+
+              _settingsCard(
+                icon: Icons.contact_support,
+                title: "اتصل بنا",
+                onTap: () {},
+              ),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  // -------------------------------
+  // عنصر عنوان القسم
+  // -------------------------------
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, top: 16),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  // -------------------------------
+  // بطاقة إعدادات عادية
+  // -------------------------------
+  Widget _settingsCard({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    required VoidCallback onTap,
+  }) {
+    final primaryColor = Theme.of(context).primaryColor;
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: ListTile(
+        leading: Icon(icon, color: primaryColor),
+        title: Text(title),
+        subtitle: subtitle != null ? Text(subtitle) : null,
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  // -------------------------------
+  // بطاقة إعدادات مع Switch
+  // -------------------------------
+  Widget _switchCard({
+    required IconData icon,
+    required String title,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
+    final primaryColor = Theme.of(context).primaryColor;
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: SwitchListTile(
+        secondary: Icon(icon, color: primaryColor),
+        title: Text(title),
+        value: value,
+        onChanged: onChanged,
       ),
     );
   }

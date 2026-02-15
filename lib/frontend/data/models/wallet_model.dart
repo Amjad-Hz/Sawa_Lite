@@ -1,10 +1,8 @@
 class WalletModel {
-  int userId;
-  double balance;
-  List<WalletTransaction> transactions;
+  final double balance;
+  final List<WalletTransaction> transactions;
 
   WalletModel({
-    required this.userId,
     required this.balance,
     required this.transactions,
   });
@@ -13,38 +11,28 @@ class WalletModel {
 class WalletTransaction {
   final int id;
   final double amount;
-  final String type; // شحن - دفع
+  final String type; // شحن - دفع - استرداد
+  final String? description;
   final DateTime date;
+  final int? orderId;
 
   WalletTransaction({
     required this.id,
     required this.amount,
     required this.type,
+    this.description,
     required this.date,
+    this.orderId,
   });
 
+  factory WalletTransaction.fromJson(Map<String, dynamic> json) {
+    return WalletTransaction(
+      id: json['id'],
+      amount: (json['amount'] as num).toDouble(),
+      type: json['type'],
+      description: json['description'],
+      date: DateTime.parse(json['created_at']),
+      orderId: json['order_id'],
+    );
+  }
 }
-final WalletModel mockWallet = WalletModel(
-  userId: 1,
-  balance: 12500,
-  transactions: [
-    WalletTransaction(
-      id: 1,
-      amount: 5000,
-      type: 'شحن',
-      date: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    WalletTransaction(
-      id: 2,
-      amount: -2000,
-      type: 'دفع',
-      date: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-    WalletTransaction(
-      id: 3,
-      amount: 3000,
-      type: 'شحن',
-      date: DateTime.now().subtract(const Duration(days: 5)),
-    ),
-  ],
-);
