@@ -27,98 +27,132 @@ class OrderStatusScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('متابعة الطلب'),
+          centerTitle: true,
         ),
+
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
+              // عنوان الخدمة
               Text(
                 service.nameAr,
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              Row(
-                children: [
-                  const Icon(Icons.info, color: Colors.blue),
-                  const SizedBox(width: 8),
-                  Text(
-                    'حالة الطلب: ',
-                    style: const TextStyle(fontSize: 16),
+              // بطاقة حالة الطلب
+              Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.info, color: primaryColor),
+                  title: const Text(
+                    'حالة الطلب:',
+                    style: TextStyle(fontSize: 16),
                   ),
-                  Text(
+                  subtitle: Text(
                     order.status,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: _statusColor(order.status),
                     ),
                   ),
-                ],
+                ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today, color: Colors.grey),
-                  const SizedBox(width: 8),
-                  Text(
+              // بطاقة تاريخ الإنشاء
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListTile(
+                  leading: const Icon(Icons.calendar_today, color: Colors.grey),
+                  title: Text(
                     'تاريخ الإنشاء: ${order.createdAt.toString().substring(0, 10)}',
                     style: const TextStyle(fontSize: 16),
                   ),
-                ],
+                ),
               ),
 
               if (order.updatedAt != null) ...[
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Icon(Icons.update, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    Text(
+                const SizedBox(height: 12),
+
+                // بطاقة آخر تحديث
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.update, color: Colors.grey),
+                    title: Text(
                       'آخر تحديث: ${order.updatedAt.toString().substring(0, 10)}',
                       style: const TextStyle(fontSize: 16),
                     ),
-                  ],
+                  ),
                 ),
               ],
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
-              if (order.notes != null)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'ملاحظاتك:',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+              // بطاقة الملاحظات
+              if (order.notes != null && order.notes!.isNotEmpty)
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'ملاحظاتك:',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(order.notes!),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    Text(order.notes!),
-                  ],
+                  ),
                 ),
 
               const Spacer(),
 
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('رجوع'),
+              // زر الرجوع
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'رجوع',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
               ),
             ],
           ),

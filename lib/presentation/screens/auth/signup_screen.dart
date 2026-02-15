@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sawa_lite/data/models/user_model.dart';
+import '../../../data/user_prefs.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -25,33 +26,58 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _register() {
+  void _register() async {
     if (_formKey.currentState!.validate()) {
-      // إنشاء مستخدم وهمي
       currentUser = UserModel(
-        id: 1, // لاحقاً يأتي من الـ Backend
+        id: 1,
         name: _nameController.text,
         phone: _phoneController.text,
         password: _passwordController.text,
       );
 
-      Navigator.pop(context, true); // نرجع إلى تسجيل الدخول
+      await UserPrefs.saveUser(currentUser!);
+
+      Navigator.pop(context, true);
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        appBar: AppBar(title: const Text('إنشاء حساب')),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
+        backgroundColor: Colors.white,
+
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
           child: Form(
             key: _formKey,
-            child: ListView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // الشعار
+                Image.asset(
+                  'assets/logo.png',
+                  width: 140,
+                  fit: BoxFit.contain,
+                ),
+
+                const SizedBox(height: 20),
+
+                Text(
+                  "إنشاء حساب جديد",
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // الاسم الكامل
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'الاسم الكامل'),
@@ -61,6 +87,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 16),
 
+                // رقم الهاتف
                 TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
@@ -71,6 +98,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 16),
 
+                // كلمة المرور
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
@@ -81,6 +109,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 16),
 
+                // تأكيد كلمة المرور
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: true,
@@ -95,9 +124,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 24),
 
-                ElevatedButton(
-                  onPressed: _register,
-                  child: const Text('إنشاء حساب'),
+                // زر إنشاء الحساب
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _register,
+                    child: const Text('إنشاء حساب'),
+                  ),
                 ),
               ],
             ),

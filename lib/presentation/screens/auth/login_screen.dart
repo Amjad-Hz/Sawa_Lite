@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sawa_lite/data/user_prefs.dart';
 import 'package:sawa_lite/presentation/screens/auth/signup_screen.dart';
 import 'package:sawa_lite/presentation/screens/home_screen.dart';
 
@@ -15,7 +16,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  bool isRegistered = false; // المستخدم غير مسجل في البداية
+  final _formKey = GlobalKey<FormState>();
+
+  bool isRegistered = false;
 
   @override
   void dispose() {
@@ -24,27 +27,40 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
-    if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرجاء إنشاء حساب أولاً')),
-      );
-      return;
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
 
-    if (_phoneController.text == currentUser!.phone &&
-        _passwordController.text == currentUser!.password) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('رقم الهاتف أو كلمة المرور غير صحيحة')),
-      );
+  void _loadUser() async {
+    currentUser = await UserPrefs.loadUser();
+    if (currentUser != null) {
+      setState(() {
+        isRegistered = true;
+      });
     }
   }
 
+  void _login() async {
+    if (_formKey.currentState!.validate()) {
+      if (currentUser != null &&
+          currentUser!.phone == _phoneController.text &&
+          currentUser!.password == _passwordController.text) {
+
+        await UserPrefs.saveUser(currentUser!);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("رقم الهاتف أو كلمة المرور غير صحيحة")),
+        );
+      }
+    }
+  }
 
   Future<void> _goToSignUp() async {
     final registered = await Navigator.push(
@@ -65,40 +81,95 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        appBar: AppBar(title: const Text('تسجيل الدخول')),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'رقم الهاتف'),
-              ),
+        backgroundColor: Colors.white,
 
-              const SizedBox(height: 16),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // الشعار
+                Image.asset(
+                  'assets/logo.png',
+                  width: 140,
+                  fit: BoxFit.contain,
+                ),
 
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'كلمة المرور'),
-              ),
+                const SizedBox(height: 20),
 
-              const SizedBox(height: 24),
+                Text(
+                  "تسجيل الدخول",
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
 
-              ElevatedButton(
-                onPressed: _login,
-                child: const Text('تسجيل الدخول'),
-              ),
+                const SizedBox(height: 30),
 
-              TextButton(
-                onPressed: _goToSignUp,
-                child: const Text('ليس لديك حساب؟ إنشاء حساب'),
-              ),
-            ],
+                // رقم الهاتف
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'رقم الهاتف',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "الرجاء إدخال رقم الهاتف";
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 16),
+
+                // كلمة المرور
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'كلمة المرور',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "الرجاء إدخال كلمة المرور";
+                    }
+                    return null;
+                  },
+                ),
+
+                const SizedBox(height: 24),
+
+                // زر تسجيل الدخول
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _login,
+                    child: const Text('تسجيل الدخول'),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // رابط إنشاء حساب
+                TextButton(
+                  onPressed: _goToSignUp,
+                  child: Text(
+                    'ليس لديك حساب؟ إنشاء حساب',
+                    style: TextStyle(color: primaryColor),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

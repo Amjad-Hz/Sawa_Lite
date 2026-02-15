@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:sawa_lite/data/models/service_model.dart';
-
 import '../../../data/models/order_model.dart';
 import 'order_status_screen.dart';
 
@@ -25,9 +24,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
   void _submitOrder() {
     if (_formKey.currentState!.validate()) {
-      // إنشاء طلب وهمي (mock) مؤقتاً
       final newOrder = OrderModel(
-        id: 999, // رقم مؤقت
+        id: 999,
         userId: 1,
         serviceId: widget.service.id,
         status: 'قيد المراجعة',
@@ -47,15 +45,18 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           title: Text('طلب خدمة: ${widget.service.nameAr}'),
+          centerTitle: true,
         ),
+
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -63,30 +64,50 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+
+                // عنوان الخدمة
                 Text(
                   widget.service.nameAr,
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                TextFormField(
-                  controller: _notesController,
-                  maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'ملاحظات (اختياري)',
-                    alignLabelWithHint: true,
+                // بطاقة الملاحظات
+                Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: TextFormField(
+                      controller: _notesController,
+                      maxLines: 4,
+                      decoration: const InputDecoration(
+                        labelText: 'ملاحظات (اختياري)',
+                        border: InputBorder.none,
+                        alignLabelWithHint: true,
+                      ),
+                    ),
                   ),
                 ),
 
                 const Spacer(),
 
-                ElevatedButton(
-                  onPressed: _submitOrder,
-                  child: const Text('إرسال الطلب'),
+                // زر إرسال الطلب
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _submitOrder,
+                    child: const Text(
+                      'إرسال الطلب',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
                 ),
               ],
             ),
