@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/theme_controller.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -29,7 +30,6 @@ class _SettingsBody extends StatelessWidget {
         children: [
           const SizedBox(height: 10),
 
-          // قسم الحساب
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
@@ -44,14 +44,11 @@ class _SettingsBody extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.language, color: primaryColor),
             title: const Text("اللغة"),
-            onTap: () {
-              // TODO: صفحة اختيار اللغة
-            },
+            onTap: () {},
           ),
 
           const Divider(),
 
-          // قسم التطبيق
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
@@ -63,26 +60,29 @@ class _SettingsBody extends StatelessWidget {
             ),
           ),
 
-          SwitchListTile(
-            title: const Text("الوضع الليلي"),
-            secondary: Icon(Icons.dark_mode, color: primaryColor),
-            value: false,
-            onChanged: (value) {
-              // TODO: تفعيل الوضع الليلي
+          // 🔥 زر الوضع الليلي يعمل الآن
+          ValueListenableBuilder<bool>(
+            valueListenable: ThemeController.instance.isDark,
+            builder: (context, isDark, _) {
+              return SwitchListTile(
+                title: const Text("الوضع الليلي"),
+                secondary: Icon(Icons.dark_mode, color: primaryColor),
+                value: isDark,
+                onChanged: (value) {
+                  ThemeController.instance.toggleTheme(value);
+                },
+              );
             },
           ),
 
           ListTile(
             leading: Icon(Icons.info, color: primaryColor),
             title: const Text("حول التطبيق"),
-            onTap: () {
-              // TODO: صفحة حول التطبيق
-            },
+            onTap: () {},
           ),
 
           const Divider(),
 
-          // قسم الدعم
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text(
@@ -97,17 +97,13 @@ class _SettingsBody extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.help, color: primaryColor),
             title: const Text("مركز المساعدة"),
-            onTap: () {
-              // TODO: صفحة المساعدة
-            },
+            onTap: () {},
           ),
 
           ListTile(
             leading: Icon(Icons.contact_support, color: primaryColor),
             title: const Text("اتصل بنا"),
-            onTap: () {
-              // TODO: صفحة اتصل بنا
-            },
+            onTap: () {},
           ),
         ],
       ),

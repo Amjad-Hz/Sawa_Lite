@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'core/theme/light_theme.dart';
+import 'core/theme/dark_theme.dart';
+import 'core/theme/theme_controller.dart';
 import 'presentation/screens/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // تحميل السيم من SharedPreferences
+  await ThemeController.instance.loadTheme();
+
   runApp(const SawaLiteApp());
 }
 
@@ -12,31 +20,39 @@ class SawaLiteApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'سوا لايت',
-      debugShowCheckedModeBanner: false,
+    return ValueListenableBuilder<bool>(
+      valueListenable: ThemeController.instance.isDark,
+      builder: (context, isDark, _) {
+        return MaterialApp(
+          title: 'سوا لايت',
+          debugShowCheckedModeBanner: false,
 
-      // 🔥 إضافة الأنيميشن العالمي هنا
-      theme: buildLightTheme().copyWith(
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: {
-            TargetPlatform.android: _CustomTransitionBuilder(),
-            TargetPlatform.iOS: _CustomTransitionBuilder(),
-          },
-        ),
-      ),
+          // 🔥 الأنيميشن العالمي كما هو
+          theme: buildLightTheme().copyWith(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: _CustomTransitionBuilder(),
+                TargetPlatform.iOS: _CustomTransitionBuilder(),
+              },
+            ),
+          ),
 
-      locale: const Locale('ar'),
-      supportedLocales: const [
-        Locale('ar'),
-      ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+          darkTheme: buildDarkTheme(),
+          themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
 
-      home: const SplashScreen(),
+          locale: const Locale('ar'),
+          supportedLocales: const [
+            Locale('ar'),
+          ],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }
