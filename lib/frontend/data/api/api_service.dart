@@ -6,7 +6,7 @@ class ApiService {
 
   late final Dio dio;
 
-  static const String baseUrl = 'http://10.0.2.2:8000';
+  static const String baseUrl = 'http://127.0.0.1:8000';
 
   String? _token;
 
@@ -42,21 +42,51 @@ class ApiService {
     required String phone,
     required String password,
   }) async {
-    final response = await dio.post(
-      '/users/login',
-      data: {
-        'username': phone,
-        'password': password,
-      },
-      options: Options(
-        contentType: Headers.formUrlEncodedContentType,
-      ),
-    );
+    try {
+      final response = await dio.post(
+        '/users/login',
+        data: {
+          'username': phone,   // FastAPI expects "username"
+          'password': password,
+        },
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+        ),
+      );
 
-    final token = response.data['access_token'];
-    setToken(token);
-    return token;
+
+      print("🔵 Login Response: ${response.data}");
+
+      // التحقق من نجاح الطلب
+      if (response.statusCode != 200) {
+        throw Exception("خطأ في الاتصال بالسيرفر");
+      }
+
+      // التحقق من وجود التوكن
+      final token = response.data['access_token'];
+      if (token == null) {
+        final detail = response.data['detail'] ?? "بيانات الدخول غير صحيحة";
+        throw Exception(detail);
+      }
+
+      // حفظ التوكن
+      setToken(token);
+      return token;
+
+    } on DioException catch (e) {
+      if (e.response != null) {
+        print("🔴 Dio Error Response: ${e.response?.data}");
+        final detail = e.response?.data['detail'] ?? "فشل تسجيل الدخول";
+        throw Exception(detail);
+      } else {
+        throw Exception("تعذر الاتصال بالسيرفر");
+      }
+    } catch (e) {
+      throw Exception("خطأ غير متوقع: $e");
+    }
   }
+
+
 
   // -----------------------------
   // 🆕 إنشاء حساب
@@ -83,6 +113,8 @@ class ApiService {
   // -----------------------------
   Future<Map<String, dynamic>> getMe() async {
     final response = await dio.get('/users/me');
+    print("🔵 Me Response: ${response.data}");
+
     return response.data;
   }
 

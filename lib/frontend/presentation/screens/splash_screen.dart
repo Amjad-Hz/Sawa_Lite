@@ -22,7 +22,8 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _navigate() async {
     await Future.delayed(const Duration(seconds: 2));
 
-    currentUser = await UserPrefs.loadUser();
+    // 🔥 تحميل المستخدم من UserPrefs
+    currentUser = await UserPrefs.getUser();
 
     if (!mounted) return;
 

@@ -11,23 +11,23 @@ class UsersManagementScreen extends StatefulWidget {
 class _UsersManagementScreenState extends State<UsersManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
 
-  // مبدئيًا بيانات تجريبية – لاحقًا تربطها مع الباكند
+  // بيانات تجريبية متوافقة مع UserModel الجديد
   List<UserModel> allUsers = [
     UserModel(
       id: 1,
       phone: "0999999999",
       email: "user1@test.com",
       fullName: "مستخدم تجريبي 1",
-      password: "1234",
-      role: "user",
+      createdAt: "2026-02-16T12:38:37.581383",
+      isVerified: false,
     ),
     UserModel(
       id: 2,
       phone: "0988888888",
       email: "admin@test.com",
       fullName: "مدير النظام",
-      password: "admin",
-      role: "admin",
+      createdAt: "2026-02-16T12:38:37.581383",
+      isVerified: true,
     ),
   ];
 
@@ -126,7 +126,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                     leading: CircleAvatar(
                       backgroundColor: primaryColor.withOpacity(0.15),
                       child: Icon(
-                        user.role == "admin" ? Icons.verified_user : Icons.person,
+                        user.isVerified ? Icons.verified : Icons.person,
                         color: primaryColor,
                       ),
                     ),
@@ -136,15 +136,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                       onSelected: (value) {
                         if (value == "delete") {
                           _deleteUser(user);
-                        } else if (value == "edit") {
-                          // لاحقًا: شاشة تعديل مستخدم
                         }
                       },
                       itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: "edit",
-                          child: Text("تعديل"),
-                        ),
                         const PopupMenuItem(
                           value: "delete",
                           child: Text(

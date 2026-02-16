@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../data/user_prefs.dart';
-import 'package:sawa_lite/frontend/data/models/user_model.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -12,13 +10,11 @@ class ChangePasswordScreen extends StatefulWidget {
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
-    _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -27,18 +23,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   void _changePassword() async {
     if (!_formKey.currentState!.validate()) return;
 
-    currentUser = UserModel(
-      id: currentUser!.id,
-      phone: currentUser!.phone,
-      email: currentUser!.email,
-      fullName: currentUser!.fullName,
-      password: _newPasswordController.text,
-      role: currentUser!.role,
-    );
-
-    await UserPrefs.saveUser(currentUser!);
+    // هنا لاحقًا سيتم إرسال طلب API لتغيير كلمة المرور
 
     Navigator.pop(context, true);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("تم تغيير كلمة المرور بنجاح")),
+    );
   }
 
   @override
@@ -60,23 +51,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             child: Column(
               children: [
                 TextFormField(
-                  controller: _currentPasswordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: "كلمة المرور الحالية",
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value != currentUser!.password) {
-                      return "كلمة المرور الحالية غير صحيحة";
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                TextFormField(
                   controller: _newPasswordController,
                   obscureText: true,
                   decoration: const InputDecoration(
@@ -97,7 +71,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   controller: _confirmPasswordController,
                   obscureText: true,
                   decoration: const InputDecoration(
-                    labelText: "تأكيد كلمة المرور الجديدة",
+                    labelText: "تأكيد كلمة المرور",
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {

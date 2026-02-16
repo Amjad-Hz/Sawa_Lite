@@ -3,16 +3,16 @@ class UserModel {
   final String phone;
   final String email;
   final String fullName;
-  final String password;
-  final String role; // يحدده الأدمن فقط
+  final String createdAt;
+  final bool isVerified;
 
   UserModel({
     required this.id,
     required this.phone,
     required this.email,
     required this.fullName,
-    required this.password,
-    required this.role,
+    required this.createdAt,
+    required this.isVerified,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -21,8 +21,8 @@ class UserModel {
       phone: json['phone'],
       email: json['email'],
       fullName: json['full_name'],
-      password: json['password'],
-      role: json['role'],
+      createdAt: json['created_at'],
+      isVerified: json['is_verified'],
     );
   }
 
@@ -32,8 +32,8 @@ class UserModel {
       "phone": phone,
       "email": email,
       "full_name": fullName,
-      "password": password,
-      "role": role,
+      "created_at": createdAt,
+      "is_verified": isVerified,
     };
   }
 }

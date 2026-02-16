@@ -56,7 +56,7 @@ class _AddExperienceScreenState extends State<AddExperienceScreen> {
       final dio = Dio();
 
       // 🔥 الحصول على التوكن من UserPrefs
-      final token = await UserPrefs.loadToken();
+      final token = await UserPrefs.getToken();
 
       final response = await dio.post(
         "http://YOUR_API_URL/community/experiences",

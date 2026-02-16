@@ -17,10 +17,15 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  bool _isLoading = false;
+
   void _login() async {
     if (!_formKey.currentState!.validate()) return;
 
+    setState(() => _isLoading = true);
+
     try {
+      // تسجيل الدخول والحصول على التوكن
       final token = await ApiService.instance.login(
         phone: _phoneController.text.trim(),
         password: _passwordController.text.trim(),
@@ -28,11 +33,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await UserPrefs.saveToken(token);
 
+      // جلب بيانات المستخدم
       final userData = await ApiService.instance.getMe();
       currentUser = UserModel.fromJson(userData);
 
       await UserPrefs.saveUser(currentUser!);
 
+      // الانتقال للصفحة الرئيسية
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -41,6 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("فشل تسجيل الدخول: $e")),
       );
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -60,21 +69,29 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 Image.asset('assets/logo.png', width: 140),
                 const SizedBox(height: 20),
-                Text("تسجيل الدخول",
-                    style: TextStyle(
-                        color: primaryColor,
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold)),
+
+                Text(
+                  "تسجيل الدخول",
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
                 const SizedBox(height: 30),
 
+                // رقم الهاتف
                 TextFormField(
                   controller: _phoneController,
                   decoration: const InputDecoration(labelText: 'رقم الهاتف'),
                   validator: (v) =>
                   v == null || v.isEmpty ? "الرجاء إدخال رقم الهاتف" : null,
                 ),
+
                 const SizedBox(height: 16),
 
+                // كلمة المرور
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
@@ -82,16 +99,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: (v) =>
                   v == null || v.isEmpty ? "الرجاء إدخال كلمة المرور" : null,
                 ),
+
                 const SizedBox(height: 24),
 
+                // زر تسجيل الدخول
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _login,
-                    child: const Text('تسجيل الدخول'),
+                    onPressed: _isLoading ? null : _login,
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('تسجيل الدخول'),
                   ),
                 ),
 
+                // الانتقال لإنشاء حساب
                 TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -99,8 +121,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       MaterialPageRoute(builder: (_) => const SignUpScreen()),
                     );
                   },
-                  child: Text('ليس لديك حساب؟ إنشاء حساب',
-                      style: TextStyle(color: primaryColor)),
+                  child: Text(
+                    'ليس لديك حساب؟ إنشاء حساب',
+                    style: TextStyle(color: primaryColor),
+                  ),
                 ),
               ],
             ),

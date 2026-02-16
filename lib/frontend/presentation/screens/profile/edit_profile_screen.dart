@@ -33,8 +33,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       phone: _phoneController.text,
       email: _emailController.text,
       fullName: _nameController.text,
-      password: currentUser!.password,
-      role: currentUser!.role, // لا يتغير
+      createdAt: currentUser!.createdAt,
+      isVerified: currentUser!.isVerified,
     );
 
     await UserPrefs.saveUser(currentUser!);

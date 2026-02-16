@@ -3,46 +3,39 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'models/user_model.dart';
 
 class UserPrefs {
-  static const String userKey = "user_data";
-  static const String tokenKey = "token";
+  static const String _tokenKey = "token";
+  static const String _userKey = "user";
 
-  static const String passwordKey = "user_password";
-
-  static Future<void> savePassword(String password) async {
+  static Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString(passwordKey, password);
+    await prefs.setString(_tokenKey, token);
   }
 
-  static Future<String?> loadPassword() async {
+  static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(passwordKey);
+    return prefs.getString(_tokenKey);
+  }
+
+  static Future<void> clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
   }
 
   static Future<void> saveUser(UserModel user) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString(userKey, jsonEncode(user.toJson()));
+    await prefs.setString(_userKey, jsonEncode(user.toJson()));
   }
 
-  static Future<UserModel?> loadUser() async {
+  static Future<UserModel?> getUser() async {
     final prefs = await SharedPreferences.getInstance();
-    final data = prefs.getString(userKey);
-    if (data == null) return null;
-    return UserModel.fromJson(jsonDecode(data));
+    final jsonString = prefs.getString(_userKey);
+    if (jsonString == null) return null;
+    final jsonMap = jsonDecode(jsonString);
+    return UserModel.fromJson(jsonMap);
   }
 
-  static Future<void> saveToken(String token) async {
+  static Future<void> clearUser() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString(tokenKey, token);
-  }
-
-  static Future<String?> loadToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(tokenKey);
-  }
-
-  static Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.remove(userKey);
-    prefs.remove(tokenKey);
+    await prefs.remove(_userKey);
   }
 }

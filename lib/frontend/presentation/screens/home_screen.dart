@@ -8,9 +8,6 @@ import 'settings/settings_screen.dart';
 import 'profile/profile_screen.dart';
 import 'package:sawa_lite/frontend/presentation/community/community_screen.dart';
 
-// 🔥 استيراد لوحة التحكم من المسار الذي وضعته
-import 'package:sawa_lite/frontend/presentation/admin/dashboard/admin_dashboard_screen.dart';
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -42,9 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
         drawer: Drawer(
           child: Column(
             children: [
-              // -------------------------------
-              // رأس القائمة (الصورة + الاسم)
-              // -------------------------------
+              // رأس القائمة
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 40),
@@ -59,7 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Icon(Icons.person, size: 50, color: primaryColor),
                     ),
                     const SizedBox(height: 10),
-
                     Text(
                       currentUser?.fullName ?? "مستخدم",
                       style: const TextStyle(
@@ -71,9 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              // -------------------------------
-              // عناصر القائمة
-              // -------------------------------
               Expanded(
                 child: ListView(
                   children: [
@@ -127,6 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
+
                     _drawerItem(
                       icon: Icons.forum,
                       title: "المجتمع",
@@ -138,32 +130,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
 
-
-                    // -------------------------------
-                    // 🔥 زر لوحة التحكم (للأدمن فقط)
-                    // -------------------------------
-                    if (currentUser?.role == "admin")
-                      _drawerItem(
-                        icon: Icons.dashboard,
-                        title: "لوحة التحكم",
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const AdminDashboardScreen(),
-                            ),
-                          );
-                        },
-                      ),
+                    // 🔥 تمت إزالة شرط admin لأنه لم يعد موجودًا في UserModel
                   ],
                 ),
               ),
 
               const Divider(),
 
-              // -------------------------------
               // تسجيل الخروج
-              // -------------------------------
               _drawerItem(
                 icon: Icons.logout,
                 title: "تسجيل الخروج",
@@ -193,7 +167,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
 
                   if (confirm == true) {
-                    await UserPrefs.clear();
+                    await UserPrefs.clearToken();
+                    await UserPrefs.clearUser();
                     currentUser = null;
 
                     Navigator.pushReplacement(
@@ -207,9 +182,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
 
-        // -------------------------------
-        // محتوى الصفحة
-        // -------------------------------
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           transitionBuilder: (child, animation) {
@@ -227,9 +199,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: _pages[_currentIndex],
         ),
 
-        // -------------------------------
-        // شريط التنقل السفلي
-        // -------------------------------
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           selectedItemColor: primaryColor,
@@ -253,9 +222,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // -------------------------------
-  // عنصر في القائمة الجانبية
-  // -------------------------------
   Widget _drawerItem({
     required IconData icon,
     required String title,
@@ -278,9 +244,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// --------------------------------------------------
-// 🔥 الصفحة الرئيسية — محسّنة بالكامل
-// --------------------------------------------------
 class _MainHomePage extends StatelessWidget {
   const _MainHomePage();
 
