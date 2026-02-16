@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-import '../../data/user_prefs.dart';
+import '../../data/api/api_service.dart';
 
 class AddExperienceScreen extends StatefulWidget {
   final int? serviceId;
@@ -29,11 +28,10 @@ class _AddExperienceScreenState extends State<AddExperienceScreen> {
 
   Future<void> fetchServices() async {
     try {
-      final dio = Dio();
-      final response = await dio.get("http://YOUR_API_URL/services");
+      final data = await ApiService.instance.getServices();
 
       setState(() {
-        services = response.data;
+        services = data;
         loadingServices = false;
       });
     } catch (e) {
@@ -43,7 +41,9 @@ class _AddExperienceScreenState extends State<AddExperienceScreen> {
   }
 
   Future<void> submitExperience() async {
-    if (selectedServiceId == null || rating == 0 || _contentController.text.isEmpty) {
+    if (selectedServiceId == null ||
+        rating == 0 ||
+        _contentController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("يرجى ملء جميع الحقول")),
       );
@@ -53,23 +53,10 @@ class _AddExperienceScreenState extends State<AddExperienceScreen> {
     setState(() => sending = true);
 
     try {
-      final dio = Dio();
-
-      // 🔥 الحصول على التوكن من UserPrefs
-      final token = await UserPrefs.getToken();
-
-      final response = await dio.post(
-        "http://YOUR_API_URL/community/experiences",
-        data: {
-          "service_id": selectedServiceId,
-          "content": _contentController.text.trim(),
-          "rating": rating,
-        },
-        options: Options(
-          headers: {
-            if (token != null && token.isNotEmpty) "Authorization": "Bearer $token",
-          },
-        ),
+      await ApiService.instance.addExperience(
+        serviceId: selectedServiceId!,
+        rating: rating,
+        content: _contentController.text.trim(),
       );
 
       setState(() => sending = false);
@@ -120,9 +107,14 @@ class _AddExperienceScreenState extends State<AddExperienceScreen> {
                   ),
                 ),
                 items: services.map<DropdownMenuItem<int>>((service) {
+                  final id = service["id"];
+                  final name = service["name"] ??
+                      service["name_ar"] ??
+                      "خدمة غير معروفة";
+
                   return DropdownMenuItem(
-                    value: service["id"],
-                    child: Text(service["name"]),
+                    value: id,
+                    child: Text(name),
                   );
                 }).toList(),
                 onChanged: (value) {

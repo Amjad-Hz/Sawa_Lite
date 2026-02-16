@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import '../models/wallet_model.dart';
+import '../user_prefs.dart';
+import '../../../main.dart';
 
 class ApiService {
   static final ApiService instance = ApiService._internal();
@@ -21,11 +24,37 @@ class ApiService {
         },
       ),
     );
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onError: (DioException e, handler) async {
+          if (e.response?.statusCode == 401) {
+            await UserPrefs.clearToken();
+            await UserPrefs.clearUser();
+            setToken(null);
+
+            final context = navigatorKey.currentContext;
+            if (context != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("انتهت الجلسة، يرجى تسجيل الدخول من جديد"),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
+
+            navigatorKey.currentState?.pushNamedAndRemoveUntil(
+              "/login",
+                  (route) => false,
+            );
+          }
+
+          return handler.next(e);
+        },
+      ),
+    );
   }
 
-  // -----------------------------
-  // 🔐 إدارة التوكن
-  // -----------------------------
   void setToken(String? token) {
     _token = token;
     if (token != null) {
@@ -35,9 +64,6 @@ class ApiService {
     }
   }
 
-  // -----------------------------
-  // 🔐 تسجيل الدخول
-  // -----------------------------
   Future<String> login({
     required String phone,
     required String password,
@@ -46,7 +72,7 @@ class ApiService {
       final response = await dio.post(
         '/users/login',
         data: {
-          'username': phone,   // FastAPI expects "username"
+          'username': phone,
           'password': password,
         },
         options: Options(
@@ -54,43 +80,18 @@ class ApiService {
         ),
       );
 
-
-      print("🔵 Login Response: ${response.data}");
-
-      // التحقق من نجاح الطلب
-      if (response.statusCode != 200) {
-        throw Exception("خطأ في الاتصال بالسيرفر");
-      }
-
-      // التحقق من وجود التوكن
       final token = response.data['access_token'];
-      if (token == null) {
-        final detail = response.data['detail'] ?? "بيانات الدخول غير صحيحة";
-        throw Exception(detail);
-      }
+      if (token == null) throw Exception("بيانات الدخول غير صحيحة");
 
-      // حفظ التوكن
       setToken(token);
       return token;
 
     } on DioException catch (e) {
-      if (e.response != null) {
-        print("🔴 Dio Error Response: ${e.response?.data}");
-        final detail = e.response?.data['detail'] ?? "فشل تسجيل الدخول";
-        throw Exception(detail);
-      } else {
-        throw Exception("تعذر الاتصال بالسيرفر");
-      }
-    } catch (e) {
-      throw Exception("خطأ غير متوقع: $e");
+      final detail = e.response?.data['detail'] ?? "فشل تسجيل الدخول";
+      throw Exception(detail);
     }
   }
 
-
-
-  // -----------------------------
-  // 🆕 إنشاء حساب
-  // -----------------------------
   Future<void> register({
     required String phone,
     required String email,
@@ -108,27 +109,42 @@ class ApiService {
     );
   }
 
-  // -----------------------------
-  // 👤 بيانات المستخدم
-  // -----------------------------
   Future<Map<String, dynamic>> getMe() async {
     final response = await dio.get('/users/me');
-    print("🔵 Me Response: ${response.data}");
-
     return response.data;
   }
 
-  // -----------------------------
-  // 🧾 الخدمات
-  // -----------------------------
+  Future<void> updateUser({
+    required String fullName,
+    required String phone,
+    required String email,
+  }) async {
+    await dio.put(
+      '/users/update',
+      data: {
+        "full_name": fullName,
+        "phone": phone,
+        "email": email,
+      },
+    );
+  }
+
+  Future<void> changePassword({
+    required String newPassword,
+  }) async {
+    await dio.post(
+      '/users/change-password',
+      data: {
+        "new_password": newPassword,
+      },
+    );
+  }
+
   Future<List<dynamic>> getServices() async {
     final response = await dio.get('/services/');
     return response.data;
   }
 
-  // -----------------------------
-  // 📝 الطلبات
-  // -----------------------------
   Future<Map<String, dynamic>> createOrder({
     required int serviceId,
     String? notes,
@@ -153,11 +169,6 @@ class ApiService {
     return response.data;
   }
 
-  // -----------------------------
-  // 💰 المحفظة
-  // -----------------------------
-
-  // جلب الرصيد + سجل العمليات
   Future<WalletModel> getWallet() async {
     final balanceRes = await dio.get('/wallet/balance');
     final txRes = await dio.get('/wallet/transactions');
@@ -174,9 +185,33 @@ class ApiService {
     );
   }
 
-  // دفع طلب من المحفظة
+  Future<void> rechargeWallet(double amount) async {
+    await dio.post('/wallet/charge', data: {"amount": amount});
+  }
+
   Future<WalletTransaction> payForOrder(int orderId) async {
     final response = await dio.post('/wallet/pay/$orderId');
     return WalletTransaction.fromJson(response.data);
   }
+
+  Future<List<dynamic>> getExperiences() async {
+    final response = await dio.get('/community/experiences');
+    return response.data;
+  }
+
+  Future<void> addExperience({
+    required int serviceId,
+    required int rating,
+    required String content,
+  }) async {
+    await dio.post(
+      '/community/experiences',
+      data: {
+        "service_id": serviceId,
+        "rating": rating,
+        "content": content,
+      },
+    );
+  }
+
 }

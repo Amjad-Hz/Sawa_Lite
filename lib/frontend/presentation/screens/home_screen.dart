@@ -7,6 +7,8 @@ import 'auth/login_screen.dart';
 import 'settings/settings_screen.dart';
 import 'profile/profile_screen.dart';
 import 'package:sawa_lite/frontend/presentation/community/community_screen.dart';
+import 'package:sawa_lite/frontend/presentation/screens/orders/my_orders_screen.dart';
+import 'package:sawa_lite/frontend/presentation/screens/wallet/wallet_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _pages = const [
     _MainHomePage(),
     ServicesListScreen(),
+    MyOrdersScreen(),
   ];
 
   @override
@@ -31,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("سوا لايت"),
+          title: const Text("Sawa Lite"),
           centerTitle: true,
           elevation: 2,
         ),
@@ -39,7 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
         drawer: Drawer(
           child: Column(
             children: [
+              // ---------------------------
               // رأس القائمة
+              // ---------------------------
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 40),
@@ -65,9 +70,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
+              // ---------------------------
+              // عناصر القائمة
+              // ---------------------------
               Expanded(
                 child: ListView(
                   children: [
+                    // القسم الأول — الصفحات الأساسية
                     _drawerItem(
                       icon: Icons.home,
                       title: "الرئيسية",
@@ -87,12 +96,61 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
 
                     _drawerItem(
+                      icon: Icons.receipt_long,
+                      title: "طلباتي",
+                      onTap: () {
+                        setState(() => _currentIndex = 2);
+                        Navigator.pop(context);
+                      },
+                    ),
+
+                    _drawerItem(
+                      icon: Icons.account_balance_wallet,
+                      title: "المحفظة",
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const WalletScreen()),
+                        );
+                      },
+                    ),
+
+                    const Divider(),
+
+                    // القسم الثاني — الحساب والإعدادات
+                    _drawerItem(
+                      icon: Icons.person,
+                      title: "الملف الشخصي",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                        );
+                      },
+                    ),
+
+                    _drawerItem(
                       icon: Icons.settings,
                       title: "الإعدادات",
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                        );
+                      },
+                    ),
+
+                    const Divider(),
+
+                    // القسم الثالث — معلومات إضافية
+                    _drawerItem(
+                      icon: Icons.forum,
+                      title: "المجتمع",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CommunityScreen()),
                         );
                       },
                     ),
@@ -107,37 +165,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
-
-                    _drawerItem(
-                      icon: Icons.person,
-                      title: "الملف الشخصي",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                        );
-                      },
-                    ),
-
-                    _drawerItem(
-                      icon: Icons.forum,
-                      title: "المجتمع",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const CommunityScreen()),
-                        );
-                      },
-                    ),
-
-                    // 🔥 تمت إزالة شرط admin لأنه لم يعد موجودًا في UserModel
                   ],
                 ),
               ),
 
               const Divider(),
 
+              // ---------------------------
               // تسجيل الخروج
+              // ---------------------------
               _drawerItem(
                 icon: Icons.logout,
                 title: "تسجيل الخروج",
@@ -182,6 +218,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
 
+        // ---------------------------
+        // محتوى الصفحات
+        // ---------------------------
         body: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           transitionBuilder: (child, animation) {
@@ -199,6 +238,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: _pages[_currentIndex],
         ),
 
+        // ---------------------------
+        // Bottom Navigation
+        // ---------------------------
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
           selectedItemColor: primaryColor,
@@ -215,6 +257,10 @@ class _HomeScreenState extends State<HomeScreen> {
             BottomNavigationBarItem(
               icon: Icon(Icons.list),
               label: "الخدمات",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.receipt_long),
+              label: "طلباتي",
             ),
           ],
         ),
@@ -279,30 +325,6 @@ class _MainHomePage extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const CommunityScreen()),
               );
             },
-          ),
-          _buildCard(
-            context,
-            icon: Icons.home_work,
-            title: "السجل العقاري",
-            onTap: () {},
-          ),
-          _buildCard(
-            context,
-            icon: Icons.car_rental,
-            title: "خدمات المركبات",
-            onTap: () {},
-          ),
-          _buildCard(
-            context,
-            icon: Icons.health_and_safety,
-            title: "التأمين الصحي",
-            onTap: () {},
-          ),
-          _buildCard(
-            context,
-            icon: Icons.account_balance,
-            title: "الدوائر الحكومية",
-            onTap: () {},
           ),
         ],
       ),

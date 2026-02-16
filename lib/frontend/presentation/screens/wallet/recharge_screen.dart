@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:sawa_lite/frontend/data/api/api_service.dart';
 
 class RechargeScreen extends StatefulWidget {
@@ -28,12 +27,7 @@ class _RechargeScreenState extends State<RechargeScreen> {
     setState(() => isLoading = true);
 
     try {
-      await ApiService.instance.dio.post(
-        '/wallet/charge',
-        data: {
-          "amount": amount,
-        },
-      );
+      await ApiService.instance.rechargeWallet(amount);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -41,13 +35,10 @@ class _RechargeScreenState extends State<RechargeScreen> {
         );
       }
 
-      Navigator.pop(context, true); // العودة للمحفظة مع تحديث
+      Navigator.pop(context, true);
+
     } catch (e) {
       String message = "فشل شحن الرصيد";
-
-      if (e is DioException && e.response != null) {
-        message = e.response!.data['detail'] ?? message;
-      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

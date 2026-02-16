@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../data/api/api_service.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -23,13 +24,22 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   void _changePassword() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // هنا لاحقًا سيتم إرسال طلب API لتغيير كلمة المرور
+    try {
+      await ApiService.instance.changePassword(
+        newPassword: _newPasswordController.text,
+      );
 
-    Navigator.pop(context, true);
+      Navigator.pop(context, true);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("تم تغيير كلمة المرور بنجاح")),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("تم تغيير كلمة المرور بنجاح")),
+      );
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("فشل تغيير كلمة المرور: $e")),
+      );
+    }
   }
 
   @override

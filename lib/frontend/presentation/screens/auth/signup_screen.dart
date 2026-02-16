@@ -17,6 +17,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  final fullNameRegex = RegExp(
+    r'^[\p{L}]{2,}\s+[\p{L}]{2,}(\s+[\p{L}]{2,})*$',
+    unicode: true,
+  );
+
   void _register() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -52,18 +57,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
               children: [
                 Image.asset('assets/logo.png', width: 140),
                 const SizedBox(height: 20),
-                Text("إنشاء حساب جديد",
-                    style: TextStyle(
-                        color: primaryColor,
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold)),
+                Text(
+                  "إنشاء حساب جديد",
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 30),
 
+                // 🔥 التحقق من الاسم الكامل
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'الاسم الكامل'),
-                  validator: (v) =>
-                  v == null || v.isEmpty ? "الرجاء إدخال الاسم" : null,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return "الرجاء إدخال الاسم";
+                    }
+                    if (!fullNameRegex.hasMatch(v.trim())) {
+                      return "يرجى إدخال الاسم الكامل (اسم أول واسم ثاني على الأقل)";
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -77,8 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 TextFormField(
                   controller: _emailController,
-                  decoration:
-                  const InputDecoration(labelText: 'البريد الإلكتروني'),
+                  decoration: const InputDecoration(labelText: 'البريد الإلكتروني'),
                   validator: (v) =>
                   v == null || v.isEmpty ? "الرجاء إدخال البريد" : null,
                 ),
@@ -96,8 +111,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: true,
-                  decoration:
-                  const InputDecoration(labelText: 'تأكيد كلمة المرور'),
+                  decoration: const InputDecoration(labelText: 'تأكيد كلمة المرور'),
                   validator: (v) =>
                   v != _passwordController.text ? "غير متطابقة" : null,
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/theme_controller.dart';
+import '../about/about_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -95,8 +96,14 @@ class _SettingsBodyState extends State<_SettingsBody> {
               _settingsCard(
                 icon: Icons.info_outline,
                 title: "حول التطبيق",
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AboutScreen()),
+                  );
+                },
               ),
+
 
               const SizedBox(height: 10),
 

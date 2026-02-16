@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sawa_lite/frontend/data/models/user_model.dart';
 import '../../../data/user_prefs.dart';
+import '../../../data/api/api_service.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -28,18 +29,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _saveChanges() async {
     if (!_formKey.currentState!.validate()) return;
 
-    currentUser = UserModel(
-      id: currentUser!.id,
-      phone: _phoneController.text,
-      email: _emailController.text,
-      fullName: _nameController.text,
-      createdAt: currentUser!.createdAt,
-      isVerified: currentUser!.isVerified,
-    );
+    try {
+      await ApiService.instance.updateUser(
+        fullName: _nameController.text,
+        phone: _phoneController.text,
+        email: _emailController.text,
+      );
 
-    await UserPrefs.saveUser(currentUser!);
+      final updated = await ApiService.instance.getMe();
 
-    Navigator.pop(context, true);
+      currentUser = UserModel.fromJson(updated);
+      await UserPrefs.saveUser(currentUser!);
+
+      Navigator.pop(context, true);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("تم تحديث البيانات بنجاح")),
+      );
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("فشل تحديث البيانات: $e")),
+      );
+    }
   }
 
   @override

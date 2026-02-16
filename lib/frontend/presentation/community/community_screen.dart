@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import '../../data/api/api_service.dart';
 import 'add_experience_screen.dart';
 
 class CommunityScreen extends StatefulWidget {
@@ -21,13 +21,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
   Future<void> fetchExperiences() async {
     try {
-      final dio = Dio();
-      final response = await dio.get(
-        "http://YOUR_API_URL/community/experiences",
-      );
+      final data = await ApiService.instance.getExperiences();
 
       setState(() {
-        experiences = response.data;
+        experiences = data;
         isLoading = false;
       });
     } catch (e) {
@@ -57,21 +54,29 @@ class _CommunityScreenState extends State<CommunityScreen> {
             style: TextStyle(fontSize: 16, color: Colors.grey),
           ),
         )
-            : ListView.builder(
-          padding: const EdgeInsets.all(12),
-          itemCount: experiences.length,
-          itemBuilder: (context, index) {
-            final exp = experiences[index];
+            : RefreshIndicator(
+          onRefresh: fetchExperiences,
+          child: ListView.builder(
+            padding: const EdgeInsets.all(12),
+            itemCount: experiences.length,
+            itemBuilder: (context, index) {
+              final exp = experiences[index];
 
-            return _experienceCard(
-              user: exp["user"]["full_name"],
-              service: exp["service"]["name"],
-              content: exp["content"],
-              rating: exp["rating"],
-              date: exp["created_at"],
-              color: primaryColor,
-            );
-          },
+              final userName = exp["user"]?["full_name"] ?? "مستخدم";
+              final serviceName = exp["service"]?["name"] ??
+                  exp["service"]?["name_ar"] ??
+                  "خدمة غير معروفة";
+
+              return _experienceCard(
+                user: userName,
+                service: serviceName,
+                content: exp["content"] ?? "",
+                rating: (exp["rating"] ?? 0) as int,
+                date: exp["created_at"] ?? "",
+                color: primaryColor,
+              );
+            },
+          ),
         ),
 
         floatingActionButton: FloatingActionButton(
@@ -84,7 +89,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
             );
 
             if (added == true) {
-              fetchExperiences();
+              await fetchExperiences();
             }
           },
           child: const Icon(Icons.add),
@@ -110,7 +115,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // اسم المستخدم + الخدمة
             Row(
               children: [
                 CircleAvatar(
@@ -139,7 +143,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
             const SizedBox(height: 8),
 
-            // التقييم
             Row(
               children: List.generate(
                 5,
@@ -153,7 +156,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
             const SizedBox(height: 10),
 
-            // المحتوى
             Text(
               content,
               style: const TextStyle(fontSize: 15),
@@ -161,11 +163,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
             const SizedBox(height: 10),
 
-            // التاريخ
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                date.split("T")[0],
+                date.contains("T") ? date.split("T")[0] : date,
                 style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
             ),

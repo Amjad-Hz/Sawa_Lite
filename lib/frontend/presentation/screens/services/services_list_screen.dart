@@ -54,51 +54,55 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
             : RefreshIndicator(
           onRefresh: _loadServices,
           child: GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            padding: const EdgeInsets.all(12),
+            gridDelegate:
+            const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 0.85,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
+              childAspectRatio: 1.05, // 🔥 بطاقات أصغر بكثير
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
             ),
             itemCount: services.length,
             itemBuilder: (context, index) {
               final service = services[index];
 
               return _AnimatedServiceItem(
-                delay: index * 120,
+                delay: index * 100,
                 child: GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => ServiceDetailsScreen(service: service),
+                        builder: (_) =>
+                            ServiceDetailsScreen(service: service),
                       ),
                     );
                   },
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: Colors.black12, width: 0.5),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 3,
+                          offset: const Offset(0, 1),
                         ),
                       ],
                     ),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(10),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.miscellaneous_services,
-                          size: 42,
+                          size: 28, // 🔥 أصغر
                           color: primaryColor,
                         ),
 
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 8),
 
                         Text(
                           service.nameAr,
@@ -106,12 +110,12 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
 
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
 
                         Text(
                           service.description ?? "لا يوجد وصف",
@@ -119,21 +123,21 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 11,
                             color: Colors.black54,
                           ),
                         ),
 
-                        const Spacer(),
+                        const SizedBox(height: 10),
 
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
+                            horizontal: 8,
+                            vertical: 4,
                           ),
                           decoration: BoxDecoration(
                             color: primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             service.cost == 0
@@ -141,6 +145,7 @@ class _ServicesListScreenState extends State<ServicesListScreen> {
                                 : "${service.cost.toInt()} ل.س",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
+                              fontSize: 12,
                               color: primaryColor,
                             ),
                           ),
@@ -195,10 +200,10 @@ class _AnimatedServiceItemState extends State<_AnimatedServiceItem> {
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 350),
       opacity: opacity,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 400),
+        duration: const Duration(milliseconds: 350),
         curve: Curves.easeOut,
         transform: Matrix4.translationValues(0, offsetY, 0),
         child: widget.child,

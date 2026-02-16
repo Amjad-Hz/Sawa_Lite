@@ -6,6 +6,8 @@ import 'frontend/core/theme/dark_theme.dart';
 import 'frontend/core/theme/theme_controller.dart';
 import 'frontend/presentation/screens/splash_screen.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -24,15 +26,15 @@ class SawaLiteApp extends StatelessWidget {
       valueListenable: ThemeController.instance.isDark,
       builder: (context, isDark, _) {
         return MaterialApp(
+          navigatorKey: navigatorKey,
           title: 'سوا لايت',
           debugShowCheckedModeBanner: false,
 
-          // 🔥 الأنيميشن العالمي كما هو
           theme: buildLightTheme().copyWith(
-            pageTransitionsTheme: const PageTransitionsTheme(
+            pageTransitionsTheme: PageTransitionsTheme(
               builders: {
-                TargetPlatform.android: _CustomTransitionBuilder(),
-                TargetPlatform.iOS: _CustomTransitionBuilder(),
+                TargetPlatform.android: const _CustomTransitionBuilder(),
+                TargetPlatform.iOS: const _CustomTransitionBuilder(),
               },
             ),
           ),
@@ -77,10 +79,12 @@ class _CustomTransitionBuilder extends PageTransitionsBuilder {
     final slide = Tween<Offset>(
       begin: const Offset(0.1, 0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: animation,
-      curve: Curves.easeOut,
-    ));
+    ).animate(
+      CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOut,
+      ),
+    );
 
     final fade = Tween<double>(
       begin: 0,
