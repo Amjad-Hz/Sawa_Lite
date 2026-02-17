@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../data/api/api_service.dart';
 
 class OrdersManagementScreen extends StatefulWidget {
   const OrdersManagementScreen({super.key});
@@ -10,40 +11,29 @@ class OrdersManagementScreen extends StatefulWidget {
 class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
 
-  // بيانات تجريبية — لاحقًا تربطها بالباكند
-  List<Map<String, dynamic>> allOrders = [
-    {
-      "id": 101,
-      "user": "مستخدم تجريبي 1",
-      "service": "استخراج بيان عائلي",
-      "status": "قيد التنفيذ",
-      "price": 15000,
-      "date": "2026-02-10"
-    },
-    {
-      "id": 102,
-      "user": "مستخدم تجريبي 2",
-      "service": "تجديد رخصة قيادة",
-      "status": "مكتمل",
-      "price": 30000,
-      "date": "2026-02-11"
-    },
-    {
-      "id": 103,
-      "user": "مستخدم تجريبي 3",
-      "service": "معاملة سجل عقاري",
-      "status": "جديد",
-      "price": 20000,
-      "date": "2026-02-12"
-    },
-  ];
-
-  List<Map<String, dynamic>> filteredOrders = [];
+  List<dynamic> allOrders = [];
+  List<dynamic> filteredOrders = [];
+  bool loading = true;
 
   @override
   void initState() {
     super.initState();
-    filteredOrders = List.from(allOrders);
+    _loadOrders();
+  }
+
+  Future<void> _loadOrders() async {
+    try {
+      final data = await ApiService.instance.adminGetAllOrders();
+
+      setState(() {
+        allOrders = data;
+        filteredOrders = List.from(allOrders);
+        loading = false;
+      });
+    } catch (e) {
+      setState(() => loading = false);
+      print("Error loading orders: $e");
+    }
   }
 
   void _filterOrders(String query) {
@@ -52,15 +42,17 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
         filteredOrders = List.from(allOrders);
       } else {
         filteredOrders = allOrders.where((order) {
-          return order["user"].toString().contains(query) ||
-              order["service"].toString().contains(query) ||
+          final service = order["service"];
+          return (service?["name_ar"] ?? "")
+              .toString()
+              .contains(query) ||
               order["id"].toString().contains(query);
         }).toList();
       }
     });
   }
 
-  void _changeStatus(Map<String, dynamic> order) {
+  void _changeStatus(dynamic order) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -68,31 +60,44 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _statusButton(order, "جديد"),
-            _statusButton(order, "قيد التنفيذ"),
-            _statusButton(order, "مكتمل"),
+            _statusButton(order, "قيد المراجعة"),
+            _statusButton(order, "مقبول"),
             _statusButton(order, "مرفوض"),
+            _statusButton(order, "مكتمل"),
           ],
         ),
       ),
     );
   }
 
-  Widget _statusButton(Map<String, dynamic> order, String status) {
+  Widget _statusButton(dynamic order, String status) {
     return ListTile(
       title: Text(status),
-      onTap: () {
-        setState(() {
-          order["status"] = status;
-        });
+      onTap: () async {
         Navigator.pop(context);
 
-        // لاحقًا: إرسال الحالة الجديدة للباكند
+        try {
+          await ApiService.instance.adminUpdateOrderStatus(order["id"], status);
+
+          setState(() {
+            order["status"] = status;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("تم تحديث الحالة إلى: $status")),
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("فشل تحديث الحالة")),
+          );
+        }
       },
     );
   }
 
-  void _showOrderDetails(Map<String, dynamic> order) {
+  void _showOrderDetails(dynamic order) {
+    final service = order["service"];
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -101,11 +106,10 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("المستخدم: ${order["user"]}"),
-            Text("الخدمة: ${order["service"]}"),
-            Text("السعر: ${order["price"]} ل.س"),
+            Text("الخدمة: ${service?["name_ar"] ?? "غير متوفر"}"),
+            const SizedBox(height: 6),
             Text("الحالة: ${order["status"]}"),
-            Text("التاريخ: ${order["date"]}"),
+            Text("التاريخ: ${order["created_at"].toString().substring(0, 10)}"),
           ],
         ),
         actions: [
@@ -122,12 +126,12 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
     switch (status) {
       case "مكتمل":
         return Colors.green;
-      case "قيد التنفيذ":
-        return Colors.orange;
+      case "مقبول":
+        return Colors.blue;
       case "مرفوض":
         return Colors.red;
       default:
-        return Colors.blueGrey;
+        return Colors.orange;
     }
   }
 
@@ -143,9 +147,10 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
           centerTitle: true,
         ),
 
-        body: Column(
+        body: loading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
           children: [
-            // حقل البحث
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: TextField(
@@ -167,6 +172,7 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
                 separatorBuilder: (_, __) => const Divider(height: 0),
                 itemBuilder: (context, index) {
                   final order = filteredOrders[index];
+                  final service = order["service"];
 
                   return ListTile(
                     leading: CircleAvatar(
@@ -174,24 +180,40 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
                       child: Icon(Icons.receipt_long, color: primaryColor),
                     ),
                     title: Text("طلب رقم ${order["id"]}"),
-                    subtitle: Text("${order["service"]} • ${order["user"]}"),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _statusColor(order["status"]).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        order["status"],
-                        style: TextStyle(
-                          color: _statusColor(order["status"]),
-                          fontWeight: FontWeight.bold,
+                    subtitle: Text(
+                      "${service?["name_ar"] ?? "خدمة غير معروفة"}\n"
+                          "التاريخ: ${order["created_at"].toString().substring(0, 10)}",
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // شارة الحالة
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _statusColor(order["status"]).withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            order["status"],
+                            style: TextStyle(
+                              color: _statusColor(order["status"]),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        // زر تغيير الحالة
+                        IconButton(
+                          icon: const Icon(Icons.edit, size: 20),
+                          tooltip: "تغيير حالة الطلب",
+                          onPressed: () => _changeStatus(order),
+                        ),
+                      ],
                     ),
                     onTap: () => _showOrderDetails(order),
-                    onLongPress: () => _changeStatus(order),
                   );
+
                 },
               ),
             ),

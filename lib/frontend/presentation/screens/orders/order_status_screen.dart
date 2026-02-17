@@ -152,7 +152,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
             children: [
               // اسم الخدمة
               Text(
-                widget.service.nameAr,
+                (updatedOrder?.service ?? widget.service).nameAr,
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,

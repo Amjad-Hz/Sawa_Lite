@@ -28,4 +28,5 @@ class ServiceModel {
       isActive: json['is_active'] ?? true,
     );
   }
+  Map<String, dynamic> toJson() { return { 'id': id, 'name_ar': nameAr, 'description': description, 'category': category, 'duration_days': durationDays, 'cost': cost, 'is_active': isActive, }; }
 }

@@ -105,7 +105,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
                       // اسم الخدمة
                       Text(
-                        order.serviceName ?? "خدمة غير معروفة",
+                        order.service?.nameAr ?? "خدمة غير معروفة",
                         style: const TextStyle(
                           fontSize: 16,
                           color: Colors.black87,
@@ -120,9 +120,9 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                           const Icon(Icons.info_outline,
                               size: 20, color: Colors.grey),
                           const SizedBox(width: 6),
-                          Text(
+                          const Text(
                             "الحالة: ",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
@@ -170,7 +170,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                                   order: order,
                                   service: ServiceModel(
                                     id: order.serviceId,
-                                    nameAr: order.serviceName ?? "خدمة",
+                                    nameAr: order.service?.nameAr ?? "خدمة",
                                     description: null,
                                     category: null,
                                     durationDays: null,

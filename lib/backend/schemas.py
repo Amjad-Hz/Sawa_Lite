@@ -20,6 +20,7 @@ class User(UserBase):
     id: int
     created_at: datetime
     is_verified: bool
+    role: str
 
     class Config:
         from_attributes = True

@@ -29,9 +29,24 @@ class UserPrefs {
   static Future<UserModel?> getUser() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString(_userKey);
+
     if (jsonString == null) return null;
-    final jsonMap = jsonDecode(jsonString);
-    return UserModel.fromJson(jsonMap);
+
+    try {
+      final jsonMap = jsonDecode(jsonString);
+
+      // إذا كانت البيانات القديمة لا تحتوي role → حذفها
+      if (!jsonMap.containsKey("role")) {
+        await prefs.remove(_userKey);
+        return null;
+      }
+
+      return UserModel.fromJson(jsonMap);
+
+    } catch (e) {
+      await prefs.remove(_userKey);
+      return null;
+    }
   }
 
   static Future<void> clearUser() async {

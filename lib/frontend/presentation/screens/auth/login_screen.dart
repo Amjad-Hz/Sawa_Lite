@@ -33,10 +33,33 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await UserPrefs.saveToken(token);
 
-      // جلب بيانات المستخدم
+      // تحميل التوكن في ApiService
+      ApiService.instance.setToken(token);
+
+      // جلب بيانات المستخدم الأساسية
       final userData = await ApiService.instance.getMe();
       currentUser = UserModel.fromJson(userData);
 
+      // 🔥 تحديد الدور بدون الاعتماد على الباك
+      String role = "user";
+
+      // أول مستخدم في قاعدة البيانات هو الأدمن
+      if (currentUser!.id == 1) {
+        role = "admin";
+      }
+
+      // تحديث currentUser بالدور الصحيح
+      currentUser = UserModel(
+        id: currentUser!.id,
+        phone: currentUser!.phone,
+        email: currentUser!.email,
+        fullName: currentUser!.fullName,
+        createdAt: currentUser!.createdAt,
+        isVerified: currentUser!.isVerified,
+        role: role,
+      );
+
+      // حفظ المستخدم النهائي
       await UserPrefs.saveUser(currentUser!);
 
       // الانتقال للصفحة الرئيسية

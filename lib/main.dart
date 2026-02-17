@@ -31,10 +31,10 @@ class SawaLiteApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
 
           theme: buildLightTheme().copyWith(
-            pageTransitionsTheme: PageTransitionsTheme(
+            pageTransitionsTheme: const PageTransitionsTheme(
               builders: {
-                TargetPlatform.android: const _CustomTransitionBuilder(),
-                TargetPlatform.iOS: const _CustomTransitionBuilder(),
+                TargetPlatform.android: _CustomTransitionBuilder(),
+                TargetPlatform.iOS: _CustomTransitionBuilder(),
               },
             ),
           ),

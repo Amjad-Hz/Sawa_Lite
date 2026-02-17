@@ -10,6 +10,7 @@ class ApiService {
   late final Dio dio;
 
   static const String baseUrl = 'http://127.0.0.1:8000';
+  // static const String baseUrl = 'http://10.0.2.2:8000';
 
   String? _token;
 
@@ -64,6 +65,10 @@ class ApiService {
     }
   }
 
+  // ============================
+  // Auth
+  // ============================
+
   Future<String> login({
     required String phone,
     required String password,
@@ -85,7 +90,6 @@ class ApiService {
 
       setToken(token);
       return token;
-
     } on DioException catch (e) {
       final detail = e.response?.data['detail'] ?? "فشل تسجيل الدخول";
       throw Exception(detail);
@@ -140,10 +144,18 @@ class ApiService {
     );
   }
 
+  // ============================
+  // Services (User)
+  // ============================
+
   Future<List<dynamic>> getServices() async {
     final response = await dio.get('/services/');
     return response.data;
   }
+
+  // ============================
+  // Orders
+  // ============================
 
   Future<Map<String, dynamic>> createOrder({
     required int serviceId,
@@ -168,6 +180,10 @@ class ApiService {
     final response = await dio.get('/orders/$id');
     return response.data;
   }
+
+  // ============================
+  // Wallet
+  // ============================
 
   Future<WalletModel> getWallet() async {
     final balanceRes = await dio.get('/wallet/balance');
@@ -194,6 +210,10 @@ class ApiService {
     return WalletTransaction.fromJson(response.data);
   }
 
+  // ============================
+  // Community
+  // ============================
+
   Future<List<dynamic>> getExperiences() async {
     final response = await dio.get('/community/experiences');
     return response.data;
@@ -214,4 +234,46 @@ class ApiService {
     );
   }
 
+  // ============================
+  // Admin — Orders
+  // ============================
+
+  Future<List<dynamic>> adminGetAllOrders() async {
+    final response = await dio.get('/admin/orders');
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> adminUpdateOrderStatus(int id, String status) async {
+    final response = await dio.patch(
+      '/admin/orders/$id/status',
+      data: {"status": status},
+    );
+    return response.data;
+  }
+
+  // ============================
+  // Admin — Users
+  // ============================
+
+  Future<List<dynamic>> adminGetAllUsers() async {
+    final response = await dio.get('/admin/users');
+    return response.data;
+  }
+
+  Future<Map<String, dynamic>> adminUpdateUserRole(int id, String role) async {
+    final response = await dio.patch(
+      '/admin/users/$id/role',
+      data: {"role": role},
+    );
+    return response.data;
+  }
+
+  // ============================
+  // Admin — Services (عرض فقط)
+  // ============================
+
+  Future<List<dynamic>> adminGetAllServices() async {
+    final response = await dio.get('/services/');
+    return response.data;
+  }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../data/models/user_model.dart';
+import '../../../data/api/api_service.dart';
 
 class UsersManagementScreen extends StatefulWidget {
   const UsersManagementScreen({super.key});
@@ -11,32 +11,29 @@ class UsersManagementScreen extends StatefulWidget {
 class _UsersManagementScreenState extends State<UsersManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
 
-  // بيانات تجريبية متوافقة مع UserModel الجديد
-  List<UserModel> allUsers = [
-    UserModel(
-      id: 1,
-      phone: "0999999999",
-      email: "user1@test.com",
-      fullName: "مستخدم تجريبي 1",
-      createdAt: "2026-02-16T12:38:37.581383",
-      isVerified: false,
-    ),
-    UserModel(
-      id: 2,
-      phone: "0988888888",
-      email: "admin@test.com",
-      fullName: "مدير النظام",
-      createdAt: "2026-02-16T12:38:37.581383",
-      isVerified: true,
-    ),
-  ];
-
-  List<UserModel> filteredUsers = [];
+  List<dynamic> allUsers = [];
+  List<dynamic> filteredUsers = [];
+  bool loading = true;
 
   @override
   void initState() {
     super.initState();
-    filteredUsers = List.from(allUsers);
+    _loadUsers();
+  }
+
+  Future<void> _loadUsers() async {
+    try {
+      final data = await ApiService.instance.adminGetAllUsers();
+
+      setState(() {
+        allUsers = data;
+        filteredUsers = List.from(allUsers);
+        loading = false;
+      });
+    } catch (e) {
+      setState(() => loading = false);
+      print("Error loading users: $e");
+    }
   }
 
   void _filterUsers(String query) {
@@ -45,44 +42,58 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
         filteredUsers = List.from(allUsers);
       } else {
         filteredUsers = allUsers.where((u) {
-          return u.fullName.contains(query) ||
-              u.phone.contains(query) ||
-              u.email.contains(query);
+          return u["full_name"].toString().contains(query) ||
+              u["phone"].toString().contains(query) ||
+              u["email"].toString().contains(query);
         }).toList();
       }
     });
   }
 
-  void _deleteUser(UserModel user) async {
-    final confirm = await showDialog<bool>(
+  void _changeRole(dynamic user) {
+    showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("حذف مستخدم"),
-        content: Text("هل أنت متأكد من حذف المستخدم: ${user.fullName}؟"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text("إلغاء"),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              "حذف",
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
+        title: Text("تغيير دور ${user["full_name"]}"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _roleButton(user, "user", "مستخدم عادي"),
+            _roleButton(user, "admin", "مشرف (Admin)"),
+          ],
+        ),
       ),
     );
+  }
 
-    if (confirm == true) {
-      setState(() {
-        allUsers.removeWhere((u) => u.id == user.id);
-        filteredUsers.removeWhere((u) => u.id == user.id);
-      });
+  Widget _roleButton(dynamic user, String role, String label) {
+    return ListTile(
+      title: Text(label),
+      onTap: () async {
+        Navigator.pop(context);
 
-      // لاحقًا: استدعاء API لحذف المستخدم من الباكند
-    }
+        try {
+          final updated = await ApiService.instance.adminUpdateUserRole(
+            user["id"],
+            role,
+          );
+
+          setState(() {
+            final index = allUsers.indexWhere((u) => u["id"] == user["id"]);
+            allUsers[index] = updated;
+            filteredUsers = List.from(allUsers);
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("تم تغيير الدور إلى: $label")),
+          );
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("فشل تغيير الدور")),
+          );
+        }
+      },
+    );
   }
 
   @override
@@ -97,9 +108,10 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
           centerTitle: true,
         ),
 
-        body: Column(
+        body: loading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
           children: [
-            // حقل البحث
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: TextField(
@@ -126,25 +138,27 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
                     leading: CircleAvatar(
                       backgroundColor: primaryColor.withOpacity(0.15),
                       child: Icon(
-                        user.isVerified ? Icons.verified : Icons.person,
+                        user["is_verified"]
+                            ? Icons.verified
+                            : Icons.person,
                         color: primaryColor,
                       ),
                     ),
-                    title: Text(user.fullName),
-                    subtitle: Text("${user.phone} • ${user.email}"),
+                    title: Text(user["full_name"]),
+                    subtitle: Text(
+                      "${user["phone"]} • ${user["email"]}\n"
+                          "الدور: ${user["role"] ?? "user"}",
+                    ),
                     trailing: PopupMenuButton<String>(
                       onSelected: (value) {
-                        if (value == "delete") {
-                          _deleteUser(user);
+                        if (value == "role") {
+                          _changeRole(user);
                         }
                       },
                       itemBuilder: (context) => [
                         const PopupMenuItem(
-                          value: "delete",
-                          child: Text(
-                            "حذف",
-                            style: TextStyle(color: Colors.red),
-                          ),
+                          value: "role",
+                          child: Text("تغيير الدور"),
                         ),
                       ],
                     ),

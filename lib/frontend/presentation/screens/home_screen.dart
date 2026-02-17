@@ -10,6 +10,8 @@ import 'package:sawa_lite/frontend/presentation/community/community_screen.dart'
 import 'package:sawa_lite/frontend/presentation/screens/orders/my_orders_screen.dart';
 import 'package:sawa_lite/frontend/presentation/screens/wallet/wallet_screen.dart';
 
+// أضف هذا السطر إذا لم يكن موجودًا
+import 'package:sawa_lite/frontend/presentation/admin/dashboard/admin_dashboard_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,7 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-
 
         drawer: Drawer(
           child: Column(
@@ -172,6 +173,26 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                     ),
+
+                    const Divider(),
+
+                    // ---------------------------
+                    // زر لوحة التحكم (Admin)
+                    // ---------------------------
+                    if (currentUser?.role == "admin")
+                      _drawerItem(
+                        icon: Icons.admin_panel_settings,
+                        title: "لوحة التحكم",
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AdminDashboardScreen(),
+                            ),
+                          );
+                        },
+                      ),
                   ],
                 ),
               ),

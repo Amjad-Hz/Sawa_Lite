@@ -1,3 +1,5 @@
+import 'service_model.dart';
+
 class OrderModel {
   final int id;
   final int userId;
@@ -7,8 +9,8 @@ class OrderModel {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
-  // اسم الخدمة (اختياري – قد لا يرجع من الباكند)
-  final String? serviceName;
+  // ← هنا التعديل الصحيح
+  final ServiceModel? service;
 
   OrderModel({
     required this.id,
@@ -18,7 +20,7 @@ class OrderModel {
     this.notes,
     required this.createdAt,
     this.updatedAt,
-    this.serviceName,
+    this.service,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -33,8 +35,10 @@ class OrderModel {
           ? DateTime.parse(json['updated_at'])
           : null,
 
-      // إذا الباكند يرجع service_name نقرأه، إذا لا نخليه null
-      serviceName: json['service_name'],
+      // ← قراءة بيانات الخدمة من الباكند
+      service: json['service'] != null
+          ? ServiceModel.fromJson(json['service'])
+          : null,
     );
   }
 
@@ -47,7 +51,7 @@ class OrderModel {
       'notes': notes,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
-      'service_name': serviceName,
+      'service': service,
     };
   }
 }

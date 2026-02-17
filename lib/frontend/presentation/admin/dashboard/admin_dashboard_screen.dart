@@ -1,35 +1,24 @@
 import 'package:flutter/material.dart';
+import '../../../data/user_prefs.dart';
+import '../../../data/models/user_model.dart';
 import 'users_management_screen.dart';
-import 'services_management_screen.dart';
 import 'orders_management_screen.dart';
-import 'wallet_management_screen.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Directionality(
-      textDirection: TextDirection.rtl,
-      child: _AdminDashboardBody(),
-    );
-  }
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _AdminDashboardBody extends StatefulWidget {
-  const _AdminDashboardBody();
-
-  @override
-  State<_AdminDashboardBody> createState() => _AdminDashboardBodyState();
-}
-
-class _AdminDashboardBodyState extends State<_AdminDashboardBody> {
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   double opacity = 0;
   double offsetY = 20;
 
   @override
   void initState() {
     super.initState();
+    _checkAdmin();
 
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
@@ -41,107 +30,100 @@ class _AdminDashboardBodyState extends State<_AdminDashboardBody> {
     });
   }
 
+  Future<void> _checkAdmin() async {
+    // currentUser موجود مسبقًا في المشروع
+    if (currentUser == null || currentUser!.role != "admin") {
+      // منع الدخول
+      Navigator.pop(context);
+
+      // رسالة توضيحية
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("غير مسموح لك بدخول لوحة التحكم"),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("لوحة تحكم الأدمن"),
-        centerTitle: true,
-      ),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("لوحة تحكم الأدمن"),
+          centerTitle: true,
+        ),
 
-      body: AnimatedOpacity(
-        duration: const Duration(milliseconds: 400),
-        opacity: opacity,
-        child: AnimatedContainer(
+        body: AnimatedOpacity(
           duration: const Duration(milliseconds: 400),
-          transform: Matrix4.translationValues(0, offsetY, 0),
-          padding: const EdgeInsets.all(16.0),
+          opacity: opacity,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 400),
+            transform: Matrix4.translationValues(0, offsetY, 0),
+            padding: const EdgeInsets.all(16.0),
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "مرحبًا بك في لوحة التحكم",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: primaryColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "مرحبًا بك في لوحة التحكم",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 8),
+                const SizedBox(height: 8),
 
-              const Text(
-                "اختر القسم الذي تريد إدارته:",
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-
-              const SizedBox(height: 20),
-
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  children: [
-                    _manageCard(
-                      context,
-                      icon: Icons.people,
-                      title: "إدارة المستخدمين",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const UsersManagementScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    _manageCard(
-                      context,
-                      icon: Icons.miscellaneous_services,
-                      title: "إدارة الخدمات",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ServicesManagementScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    _manageCard(
-                      context,
-                      icon: Icons.receipt_long,
-                      title: "إدارة الطلبات",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const OrdersManagementScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    _manageCard(
-                      context,
-                      icon: Icons.account_balance_wallet,
-                      title: "إدارة الرصيد",
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const WalletManagementScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                const Text(
+                  "اختر القسم الذي تريد إدارته:",
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 20),
+
+                Expanded(
+                  child: GridView.count(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    children: [
+                      _manageCard(
+                        context,
+                        icon: Icons.people,
+                        title: "إدارة المستخدمين",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const UsersManagementScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      _manageCard(
+                        context,
+                        icon: Icons.receipt_long,
+                        title: "إدارة الطلبات",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const OrdersManagementScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
