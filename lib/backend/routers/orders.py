@@ -28,7 +28,8 @@ def create_order(
             user_id=current_user.id,
             service_id=order.service_id,
             notes=order.notes,
-            status="قيد المراجعة"
+            status="قيد المراجعة",
+            is_paid=(service.cost == 0)  # إذا كانت مجانية، تصبح مدفوعة فوراً 
         )
         db.add(db_order)
         db.commit()

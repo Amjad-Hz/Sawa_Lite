@@ -48,6 +48,7 @@ class Order(Base):
     notes = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_paid = Column(Boolean, default=False)
 
     # العلاقات
     user = relationship("User", back_populates="orders")
