@@ -9,7 +9,7 @@ class OrderModel {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
-  // ← هنا التعديل الصحيح
+
   final ServiceModel? service;
 
   OrderModel({
@@ -35,7 +35,7 @@ class OrderModel {
           ? DateTime.parse(json['updated_at'])
           : null,
 
-      // ← قراءة بيانات الخدمة من الباكند
+
       service: json['service'] != null
           ? ServiceModel.fromJson(json['service'])
           : null,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../data/user_prefs.dart';
 import '../../../data/models/user_model.dart';
 import 'users_management_screen.dart';
 import 'orders_management_screen.dart';
@@ -31,12 +30,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Future<void> _checkAdmin() async {
-    // currentUser موجود مسبقًا في المشروع
+
     if (currentUser == null || currentUser!.role != "admin") {
-      // منع الدخول
+
       Navigator.pop(context);
 
-      // رسالة توضيحية
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("غير مسموح لك بدخول لوحة التحكم"),

@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:label="Sawa_Lite"
+        android:label="Sawa Lite"
         android:icon="@mipmap/ic_launcher">
 
 

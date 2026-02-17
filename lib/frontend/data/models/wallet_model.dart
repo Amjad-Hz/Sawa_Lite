@@ -11,7 +11,7 @@ class WalletModel {
 class WalletTransaction {
   final int id;
   final double amount;
-  final String type; // شحن - دفع - استرداد
+  final String type;
   final String? description;
   final DateTime date;
   final int? orderId;
