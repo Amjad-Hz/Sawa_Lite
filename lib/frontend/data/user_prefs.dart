@@ -35,7 +35,7 @@ class UserPrefs {
     try {
       final jsonMap = jsonDecode(jsonString);
 
-      // إذا كانت البيانات القديمة لا تحتوي role → حذفها
+
       if (!jsonMap.containsKey("role")) {
         await prefs.remove(_userKey);
         return null;

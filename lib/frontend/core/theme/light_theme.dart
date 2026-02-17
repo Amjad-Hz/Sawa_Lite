@@ -7,13 +7,13 @@ ThemeData buildLightTheme() {
   return ThemeData(
     fontFamily: 'Roboto',
 
-    // اللون الأساسي للتطبيق
+
     primaryColor: primaryGreen,
 
-    // خلفية الشاشات
+
     scaffoldBackgroundColor: Colors.white,
 
-    // AppBar
+
     appBarTheme: const AppBarTheme(
       backgroundColor: primaryGreen,
       foregroundColor: Colors.white,

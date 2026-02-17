@@ -8,10 +8,10 @@ ThemeData buildDarkTheme() {
     brightness: Brightness.dark,
     fontFamily: 'Roboto',
 
-    // اللون الأساسي
+
     primaryColor: primaryGreen,
 
-    // خلفية الشاشات
+
     scaffoldBackgroundColor: const Color(0xFF121212),
 
     // AppBar
@@ -22,7 +22,7 @@ ThemeData buildDarkTheme() {
       elevation: 0,
     ),
 
-    // حقول الإدخال
+    //input
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -31,7 +31,7 @@ ThemeData buildDarkTheme() {
       fillColor: const Color(0xFF1E1E1E),
     ),
 
-    // الأزرار
+    //button
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryGreen,
@@ -51,7 +51,7 @@ ThemeData buildDarkTheme() {
       elevation: 10,
     ),
 
-    // البطاقات
+    //card
     cardTheme: CardTheme(
       color: const Color(0xFF1E1E1E),
       elevation: 3,
@@ -60,7 +60,7 @@ ThemeData buildDarkTheme() {
       ),
     ),
 
-    // النصوص
+    //text
     textTheme: const TextTheme(
       bodyMedium: TextStyle(color: Colors.white),
       bodySmall: TextStyle(color: Colors.white70),
