@@ -22,6 +22,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
     _loadOrders();
   }
 
+  // Load user's orders from backend
   Future<void> _loadOrders() async {
     try {
       final data = await ApiService.instance.getMyOrders();
@@ -31,12 +32,13 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
       setState(() => isLoading = false);
     } catch (e) {
       setState(() {
-        errorMessage = "فشل تحميل الطلبات: $e";
+        errorMessage = "Failed to load orders: $e";
         isLoading = false;
       });
     }
   }
 
+  // Color for order status
   Color _statusColor(String status) {
     switch (status) {
       case 'مكتمل':
@@ -46,7 +48,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
       case 'مقبول':
         return Colors.blue;
       default:
-        return Colors.orange; // قيد المراجعة
+        return Colors.orange;
     }
   }
 
@@ -85,11 +87,10 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // رقم الطلب
+                      // Order ID
                       Row(
                         children: [
-                          Icon(Icons.receipt_long,
-                              color: primaryColor),
+                          Icon(Icons.receipt_long, color: primaryColor),
                           const SizedBox(width: 8),
                           Text(
                             "طلب رقم: ${order.id}",
@@ -103,7 +104,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
                       const SizedBox(height: 8),
 
-                      // اسم الخدمة
+                      // Service name
                       Text(
                         order.service?.nameAr ?? "خدمة غير معروفة",
                         style: const TextStyle(
@@ -114,7 +115,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
                       const SizedBox(height: 8),
 
-                      // حالة الطلب
+                      // Order status
                       Row(
                         children: [
                           const Icon(Icons.info_outline,
@@ -140,7 +141,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
                       const SizedBox(height: 8),
 
-                      // تاريخ الطلب
+                      // Order date
                       Row(
                         children: [
                           const Icon(Icons.calendar_today,
@@ -158,7 +159,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
                       const SizedBox(height: 12),
 
-                      // زر متابعة الطلب
+                      // View order details button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(

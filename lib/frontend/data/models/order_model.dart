@@ -9,7 +9,10 @@ class OrderModel {
   final DateTime createdAt;
   final DateTime? updatedAt;
 
-  // ← هنا التعديل الصحيح
+  // Payment status
+  final bool isPaid;
+
+  // Service data
   final ServiceModel? service;
 
   OrderModel({
@@ -20,6 +23,7 @@ class OrderModel {
     this.notes,
     required this.createdAt,
     this.updatedAt,
+    required this.isPaid,
     this.service,
   });
 
@@ -35,7 +39,10 @@ class OrderModel {
           ? DateTime.parse(json['updated_at'])
           : null,
 
-      // ← قراءة بيانات الخدمة من الباكند
+      // Read payment status
+      isPaid: json['is_paid'] ?? false,
+
+      // Read service data
       service: json['service'] != null
           ? ServiceModel.fromJson(json['service'])
           : null,
@@ -51,7 +58,8 @@ class OrderModel {
       'notes': notes,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
-      'service': service,
+      'is_paid': isPaid,
+      'service': service?.toJson(),
     };
   }
 }

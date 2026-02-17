@@ -31,10 +31,10 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     _loadOrder();
   }
 
+  // Load order details from backend
   Future<void> _loadOrder() async {
     try {
-      final response =
-      await ApiService.instance.getOrderById(widget.order.id);
+      final response = await ApiService.instance.getOrderById(widget.order.id);
 
       setState(() {
         updatedOrder = OrderModel.fromJson(response);
@@ -43,23 +43,19 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
       });
     } catch (e) {
       setState(() {
-        errorMessage = "فشل تحميل حالة الطلب: $e";
+        errorMessage = "Failed to load order status: $e";
         isLoading = false;
         isRefreshing = false;
       });
     }
   }
 
-  // الحالات التي يسمح فيها بالدفع
-  bool _canPay(String status) {
-    return status == 'قيد المراجعة' || status == 'مقبول';
-  }
-
-  // الطلب مدفوع إذا كان مكتمل
+  // Check if order is paid
   bool _isPaid(OrderModel order) {
-    return order.status == 'مكتمل';
+    return order.isPaid == true;
   }
 
+  // Handle payment
   Future<void> _payForOrder() async {
     setState(() {
       isPaying = true;
@@ -71,14 +67,14 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم الدفع بنجاح من المحفظة')),
+          const SnackBar(content: Text('Payment completed successfully')),
         );
       }
 
       await _loadOrder();
     } catch (e) {
       if (mounted) {
-        String message = "فشل الدفع";
+        String message = "Payment failed";
 
         if (e is DioException && e.response != null) {
           message = e.response!.data['detail'] ?? message;
@@ -97,6 +93,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
     }
   }
 
+  // Color for order status
   Color _statusColor(String status) {
     switch (status) {
       case 'مكتمل':
@@ -106,8 +103,13 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
       case 'مقبول':
         return Colors.blue;
       default:
-        return Colors.orange; // قيد المراجعة
+        return Colors.orange;
     }
+  }
+
+  // Color for payment status
+  Color _paymentColor(bool isPaid) {
+    return isPaid ? Colors.green : Colors.red;
   }
 
   @override
@@ -150,7 +152,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // اسم الخدمة
+              // Service name
               Text(
                 (updatedOrder?.service ?? widget.service).nameAr,
                 style: const TextStyle(
@@ -161,7 +163,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
               const SizedBox(height: 20),
 
-              // حالة الطلب
+              // Order status
               Card(
                 elevation: 3,
                 shape: RoundedRectangleBorder(
@@ -186,7 +188,35 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
               const SizedBox(height: 12),
 
-              // تاريخ الإنشاء
+              // Payment status
+              Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListTile(
+                  leading: Icon(
+                    Icons.payments,
+                    color: _paymentColor(order.isPaid),
+                  ),
+                  title: const Text(
+                    'حالة الدفع:',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  subtitle: Text(
+                    order.isPaid ? "مدفوع" : "غير مدفوع",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: _paymentColor(order.isPaid),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Creation date
               Card(
                 elevation: 2,
                 shape: RoundedRectangleBorder(
@@ -202,7 +232,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                 ),
               ),
 
-              // آخر تحديث
+              // Last update
               if (order.updatedAt != null) ...[
                 const SizedBox(height: 12),
                 Card(
@@ -223,7 +253,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
               const SizedBox(height: 12),
 
-              // ملاحظات
+              // Notes
               if (order.notes != null && order.notes!.isNotEmpty)
                 Card(
                   elevation: 2,
@@ -233,8 +263,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
-                      crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
                           'ملاحظاتك:',
@@ -252,8 +281,8 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
               const Spacer(),
 
-              // زر الدفع
-              if (_canPay(order.status) && !_isPaid(order))
+              // Payment button (only if not paid)
+              if (!_isPaid(order))
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -277,7 +306,7 @@ class _OrderStatusScreenState extends State<OrderStatusScreen> {
 
               const SizedBox(height: 8),
 
-              // زر الرجوع
+              // Back button
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(

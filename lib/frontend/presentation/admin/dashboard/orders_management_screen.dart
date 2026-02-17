@@ -109,6 +109,7 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
             Text("الخدمة: ${service?["name_ar"] ?? "غير متوفر"}"),
             const SizedBox(height: 6),
             Text("الحالة: ${order["status"]}"),
+            Text("الدفع: ${order["is_paid"] == true ? "مدفوع" : "غير مدفوع"}"),
             Text("التاريخ: ${order["created_at"].toString().substring(0, 10)}"),
           ],
         ),
@@ -133,6 +134,10 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
       default:
         return Colors.orange;
     }
+  }
+
+  Color _paymentColor(bool isPaid) {
+    return isPaid ? Colors.green : Colors.red;
   }
 
   @override
@@ -182,16 +187,40 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
                     title: Text("طلب رقم ${order["id"]}"),
                     subtitle: Text(
                       "${service?["name_ar"] ?? "خدمة غير معروفة"}\n"
-                          "التاريخ: ${order["created_at"].toString().substring(0, 10)}",
+                          "التاريخ: ${order["created_at"].toString().substring(0, 10)}\n"
+                          "الدفع: ${order["is_paid"] == true ? "مدفوع" : "غير مدفوع"}",
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // شارة الحالة
+                        // paid status
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: _statusColor(order["status"]).withOpacity(0.15),
+                            color: _paymentColor(order["is_paid"])
+                                .withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            order["is_paid"] == true
+                                ? "مدفوع"
+                                : "غير مدفوع",
+                            style: TextStyle(
+                              color: _paymentColor(order["is_paid"]),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+
+                        // order status
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _statusColor(order["status"])
+                                .withOpacity(0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -203,7 +232,8 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // زر تغيير الحالة
+
+                        // edit status button
                         IconButton(
                           icon: const Icon(Icons.edit, size: 20),
                           tooltip: "تغيير حالة الطلب",
@@ -213,7 +243,6 @@ class _OrdersManagementScreenState extends State<OrdersManagementScreen> {
                     ),
                     onTap: () => _showOrderDetails(order),
                   );
-
                 },
               ),
             ),

@@ -24,7 +24,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   void initState() {
     super.initState();
 
-    // Animation
+    // Simple fade and slide animation on screen load
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
         setState(() {
@@ -41,6 +41,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     super.dispose();
   }
 
+  // Submit order to backend
   Future<void> _submitOrder() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -62,20 +63,20 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           title: const Text(
-            "تم إرسال الطلب بنجاح",
+            "Order Submitted Successfully",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           content: Text(
-            "رقم الطلب: ${order['id']}",
+            "Order ID: ${order['id']}",
             style: const TextStyle(fontSize: 16),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context); // close dialog
-                Navigator.pop(context); // back to details
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Go back to service details
               },
-              child: const Text("حسناً"),
+              child: const Text("OK"),
             ),
           ],
         ),
@@ -83,7 +84,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     } catch (e) {
       setState(() => isLoading = false);
 
-      String message = "فشل إرسال الطلب";
+      String message = "Failed to submit order";
 
       if (e is DioException && e.response != null) {
         message = e.response!.data['detail'] ?? message;
@@ -121,7 +122,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // عنوان الخدمة
+                  // Service title
                   Text(
                     service.nameAr,
                     style: const TextStyle(
@@ -132,7 +133,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
                   const SizedBox(height: 20),
 
-                  // بطاقة الملاحظات
+                  // Notes input card
                   Card(
                     elevation: 3,
                     shape: RoundedRectangleBorder(
@@ -144,7 +145,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                         controller: _notesController,
                         maxLines: 4,
                         decoration: const InputDecoration(
-                          labelText: 'ملاحظات (اختياري)',
+                          labelText: 'Notes (optional)',
                           border: InputBorder.none,
                           alignLabelWithHint: true,
                         ),
@@ -154,7 +155,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
                   const Spacer(),
 
-                  // زر إرسال الطلب
+                  // Submit button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -175,7 +176,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                         ),
                       )
                           : const Text(
-                        'إرسال الطلب',
+                        'Submit Order',
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
