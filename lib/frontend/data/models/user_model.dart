@@ -25,7 +25,7 @@ class UserModel {
       fullName: json['full_name'],
       createdAt: json['created_at'],
       isVerified: json['is_verified'],
-      role: json['role'] ?? "user",
+      role: json['role'] ?? "user", // ← مهم جدًا
     );
   }
 

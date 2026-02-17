@@ -10,7 +10,6 @@ class ApiService {
   late final Dio dio;
 
   static const String baseUrl = 'http://127.0.0.1:8000';
-  
   // static const String baseUrl = 'http://10.0.2.2:8000';
 
   String? _token;
@@ -66,8 +65,9 @@ class ApiService {
     }
   }
 
-
+  // ============================
   // Auth
+  // ============================
 
   Future<String> login({
     required String phone,
@@ -144,14 +144,18 @@ class ApiService {
     );
   }
 
+  // ============================
   // Services (User)
+  // ============================
 
   Future<List<dynamic>> getServices() async {
     final response = await dio.get('/services/');
     return response.data;
   }
 
+  // ============================
   // Orders
+  // ============================
 
   Future<Map<String, dynamic>> createOrder({
     required int serviceId,
@@ -177,7 +181,9 @@ class ApiService {
     return response.data;
   }
 
+  // ============================
   // Wallet
+  // ============================
 
   Future<WalletModel> getWallet() async {
     final balanceRes = await dio.get('/wallet/balance');
@@ -204,7 +210,9 @@ class ApiService {
     return WalletTransaction.fromJson(response.data);
   }
 
+  // ============================
   // Community
+  // ============================
 
   Future<List<dynamic>> getExperiences() async {
     final response = await dio.get('/community/experiences');
@@ -226,7 +234,9 @@ class ApiService {
     );
   }
 
+  // ============================
   // Admin — Orders
+  // ============================
 
   Future<List<dynamic>> adminGetAllOrders() async {
     final response = await dio.get('/admin/orders');
@@ -241,7 +251,9 @@ class ApiService {
     return response.data;
   }
 
+  // ============================
   // Admin — Users
+  // ============================
 
   Future<List<dynamic>> adminGetAllUsers() async {
     final response = await dio.get('/admin/users');
@@ -256,7 +268,9 @@ class ApiService {
     return response.data;
   }
 
-  // Admin — Services
+  // ============================
+  // Admin — Services (عرض فقط)
+  // ============================
 
   Future<List<dynamic>> adminGetAllServices() async {
     final response = await dio.get('/services/');

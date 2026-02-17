@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // login and token
+      // تسجيل الدخول والحصول على التوكن
       final token = await ApiService.instance.login(
         phone: _phoneController.text.trim(),
         password: _passwordController.text.trim(),
@@ -33,22 +33,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await UserPrefs.saveToken(token);
 
-      // load token ApiService
+      // تحميل التوكن في ApiService
       ApiService.instance.setToken(token);
 
-      // get user data
+      // جلب بيانات المستخدم الأساسية
       final userData = await ApiService.instance.getMe();
       currentUser = UserModel.fromJson(userData);
 
-      //  default role
+      // 🔥 تحديد الدور بدون الاعتماد على الباك
       String role = "user";
 
-      // default role
+      // أول مستخدم في قاعدة البيانات هو الأدمن
       if (currentUser!.id == 1) {
         role = "admin";
       }
 
-      //  currentUser data
+      // تحديث currentUser بالدور الصحيح
       currentUser = UserModel(
         id: currentUser!.id,
         phone: currentUser!.phone,
@@ -59,10 +59,10 @@ class _LoginScreenState extends State<LoginScreen> {
         role: role,
       );
 
-      // save user
+      // حفظ المستخدم النهائي
       await UserPrefs.saveUser(currentUser!);
 
-      // go to home page
+      // الانتقال للصفحة الرئيسية
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 30),
 
-                // phone
+                // رقم الهاتف
                 TextFormField(
                   controller: _phoneController,
                   decoration: const InputDecoration(labelText: 'رقم الهاتف'),
@@ -114,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 16),
 
-                // pass
+                // كلمة المرور
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
@@ -125,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 const SizedBox(height: 24),
 
-                // login button
+                // زر تسجيل الدخول
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -136,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                // go to signup
+                // الانتقال لإنشاء حساب
                 TextButton(
                   onPressed: () {
                     Navigator.push(

@@ -60,7 +60,7 @@ class _AboutScreenBodyState extends State<_AboutScreenBody> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
 
-                // logo
+                // الشعار
                 Image.asset(
                   'assets/logo.png',
                   width: 120,

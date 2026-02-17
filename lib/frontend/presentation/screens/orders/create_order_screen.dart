@@ -121,7 +121,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // عنوان الخدمة
+                  // service name
                   Text(
                     service.nameAr,
                     style: const TextStyle(
@@ -132,7 +132,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
                   const SizedBox(height: 20),
 
-                  // بطاقة الملاحظات
+                  // note
                   Card(
                     elevation: 3,
                     shape: RoundedRectangleBorder(
@@ -154,7 +154,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
                   const Spacer(),
 
-                  // زر إرسال الطلب
+                  // send
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(

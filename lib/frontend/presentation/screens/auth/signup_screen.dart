@@ -67,7 +67,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 30),
 
-                // full name
+                // 🔥 التحقق من الاسم الكامل
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: 'الاسم الكامل'),

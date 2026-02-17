@@ -46,7 +46,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
       case 'مقبول':
         return Colors.blue;
       default:
-        return Colors.orange; // قيد المراجعة
+        return Colors.orange;
     }
   }
 
@@ -85,7 +85,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // رقم الطلب
+                      // order id
                       Row(
                         children: [
                           Icon(Icons.receipt_long,
@@ -103,7 +103,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
                       const SizedBox(height: 8),
 
-                      // اسم الخدمة
+                      // service name
                       Text(
                         order.service?.nameAr ?? "خدمة غير معروفة",
                         style: const TextStyle(
@@ -114,7 +114,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
                       const SizedBox(height: 8),
 
-                      // حالة الطلب
+                      // order status
                       Row(
                         children: [
                           const Icon(Icons.info_outline,
@@ -140,7 +140,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
                       const SizedBox(height: 8),
 
-                      // تاريخ الطلب
+                      // order date
                       Row(
                         children: [
                           const Icon(Icons.calendar_today,
@@ -158,7 +158,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
 
                       const SizedBox(height: 12),
 
-                      // زر متابعة الطلب
+                      // order status button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
