@@ -24,7 +24,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   void initState() {
     super.initState();
 
-    // Simple fade and slide animation on screen load
+    // Start simple fade and slide animation
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
         setState(() {
@@ -55,7 +55,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
       setState(() => isLoading = false);
 
-      // Success dialog
+      // Show success dialog
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -63,20 +63,20 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             borderRadius: BorderRadius.circular(16),
           ),
           title: const Text(
-            "Order Submitted Successfully",
+            "تم إرسال الطلب بنجاح",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           content: Text(
-            "Order ID: ${order['id']}",
+            "رقم الطلب: ${order['id']}",
             style: const TextStyle(fontSize: 16),
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context); // Close dialog
-                Navigator.pop(context); // Go back to service details
+                Navigator.pop(context); // Return to previous screen
               },
-              child: const Text("OK"),
+              child: const Text("حسناً"),
             ),
           ],
         ),
@@ -84,7 +84,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     } catch (e) {
       setState(() => isLoading = false);
 
-      String message = "Failed to submit order";
+      String message = "فشل إرسال الطلب";
 
       if (e is DioException && e.response != null) {
         message = e.response!.data['detail'] ?? message;
@@ -145,7 +145,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                         controller: _notesController,
                         maxLines: 4,
                         decoration: const InputDecoration(
-                          labelText: 'Notes (optional)',
+                          labelText: 'ملاحظات (اختياري)',
                           border: InputBorder.none,
                           alignLabelWithHint: true,
                         ),
@@ -155,7 +155,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
                   const Spacer(),
 
-                  // Submit button
+                  // Submit order button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -176,7 +176,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                         ),
                       )
                           : const Text(
-                        'Submit Order',
+                        'إرسال الطلب',
                         style: TextStyle(fontSize: 18),
                       ),
                     ),

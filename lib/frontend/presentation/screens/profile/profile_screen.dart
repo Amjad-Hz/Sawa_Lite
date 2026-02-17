@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sawa_lite/frontend/data/models/user_model.dart';
 import 'edit_profile_screen.dart';
-import 'change_password_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -82,18 +81,6 @@ class ProfileScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const EditProfileScreen()),
-                  );
-                },
-              ),
-
-              ListTile(
-                leading: Icon(Icons.lock, color: primaryColor),
-                title: const Text('تغيير كلمة المرور'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
                   );
                 },
               ),

@@ -87,6 +87,9 @@ def update_user(
             current_user.full_name = user_update.full_name
         if user_update.email is not None:
             current_user.email = user_update.email
+        if user_update.phone:
+            current_user.phone = user_update.phone
+   
         db.commit()
         db.refresh(current_user)
         return current_user
