@@ -1,4 +1,5 @@
 # routers/wallet.py
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -53,27 +54,22 @@ def charge_wallet(
     db.refresh(transaction)
     return transaction
 
-# يمكن إضافة عملية دفع عند إنشاء طلب، لكننا سنفعلها في مسار الطلبات لاحقاً
 @router.post("/pay/{order_id}", response_model=schemas.WalletTransaction)
 def pay_for_order(
     order_id: int,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    # التحقق من وجود الطلب
-    order = db.query(models.Order).filter(models.Order.id == order_id, models.Order.user_id == current_user.id).first()
+    order = db.query(models.Order).filter(
+        models.Order.id == order_id,
+        models.Order.user_id == current_user.id
+    ).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
-    # التحقق من أن الطلب لم يدفع مسبقاً (نتجنب الدفع المكرر)
-    existing = db.query(models.WalletTransaction).filter(
-        models.WalletTransaction.order_id == order_id,
-        models.WalletTransaction.type == "دفع"
-    ).first()
-    if existing:
+    if order.is_paid:
         raise HTTPException(status_code=400, detail="Order already paid")
     
-    # الحصول على تكلفة الخدمة
     service = db.query(models.Service).filter(models.Service.id == order.service_id).first()
     if not service:
         raise HTTPException(status_code=404, detail="Service not found")
@@ -82,12 +78,10 @@ def pay_for_order(
     if cost <= 0:
         raise HTTPException(status_code=400, detail="Service is free, no payment needed")
     
-    # التحقق من الرصيد
     balance = get_user_balance(db, current_user.id)
     if balance < cost:
         raise HTTPException(status_code=400, detail="Insufficient balance")
     
-    # إنشاء معاملة دفع
     transaction = models.WalletTransaction(
         user_id=current_user.id,
         type="دفع",
@@ -96,6 +90,11 @@ def pay_for_order(
         order_id=order.id
     )
     db.add(transaction)
+    
+    # تحديث حالة الدفع
+    order.is_paid = True
+    order.updated_at = datetime.utcnow()
+    
     db.commit()
     db.refresh(transaction)
     return transaction

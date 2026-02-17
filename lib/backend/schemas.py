@@ -20,7 +20,6 @@ class User(UserBase):
     id: int
     created_at: datetime
     is_verified: bool
-    role: str
 
     class Config:
         from_attributes = True
@@ -69,6 +68,7 @@ class Order(OrderBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     service: Optional[Service] = None  # لتضمين بيانات الخدمة
+    is_paid: bool
 
     class Config:
         from_attributes = True
